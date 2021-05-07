@@ -9,6 +9,7 @@
 namespace Skeleton\Application\Api;
 
 use \Skeleton\Application\Api\Path\Parameter;
+use \Skeleton\Application\Api\Path\Response;
 
 abstract class Endpoint {
 
@@ -31,71 +32,95 @@ abstract class Endpoint {
 	 * Get paths
 	 *
 	 * @access public
+	 * @return \Skeleton\Application\Api\Path[] $paths
 	 */
 	public function get_paths() {
-		$reflection = new \ReflectionClass($this);
-		$methods = $reflection->getMethods(\ReflectionMethod::IS_PUBLIC);
+		return \Skeleton\Application\Api\Path::get_by_endpoint($this);
+	}
 
-		// Only check for methods in child class		
-		foreach ($methods as $key => $method) {
-			if ($method->class == get_parent_class($this)) {
-				unset($methods[$key]);
+	/**
+	 * Accept request
+	 *
+	 * @access public
+	 */
+	public function accept_request() {
+
+		// Find the method name to call
+		$method = strtolower($_SERVER['REQUEST_METHOD']);
+		if (isset($_GET['action'])) {
+			$method .= '_' . $_GET['action'];
+		}
+
+		if (!is_callable([$this, $method])) {
+			\Skeleton\Core\Web\HTTP\Status::code_404('module');
+		}
+
+		$paths = $this->get_paths();
+		$requested_path = null;
+		foreach ($paths as $path) {
+			if ($path->method == $method) {
+				$requested_path = $path;
 			}
 		}
-		$operations = [ 'get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace' ];		
-		foreach ($methods as $method) {
-			foreach ($operations as $operation) {
-				if (strpos($method->name, $operation) !== 0) {
-					continue;
-				}
-				$path = new Path();
-				$path->operation = $operation;
-				$name = substr($method->name, strlen($operation));
-				$name = ltrim($name, '_');
-				$name = '/' . $this->get_name() . '/' . $name;
-				$name = rtrim($name, '/');
-				$path->name = $name;
-
-				/**
-				 * Get the docblock of the method
-				 */
-				try {
-					$docblock = $method->getDocComment();
-					$factory  = \phpDocumentor\Reflection\DocBlockFactory::createInstance();
-					$docblock = $factory->create($docblock);
-					$path->summary = $docblock->getSummary();
-
-					/**
-					 *  Add parameters by docblock
-					 */
-					$params = $docblock->getTagsByName('param');
-					foreach ($params as $param) {
-						$parameter = new Parameter();
-						$parameter->name = $param->getVariableName();
-						$parameter->description = $param->getDescription()->getBodyTemplate();
-						$parameter->type = (string)$param->getType();
-						$path->parameters[] = $parameter;			
-					}
-				} catch (\Webmozart\Assert\InvalidArgumentException $e) {
-					// No docblock found		
-				}
-
-				/**
-				 * Get the method parameters, make them required
-				 */
-				$params = $method->getParameters();
-				foreach ($params as $param) {
-					try {
-						$parameter = $path->get_parameter_by_name($param->name);
-					} catch (\Exception $e) {
-						throw new \Exception('Required parameter ' . $param->name . ' for method ' . $method->name . ' is not mentioned in docblock');
-					}
-					$parameter->required = true;
-				}
-				print_r($path);
-			}			
+		
+		if ($requested_path === null) {
+			\Skeleton\Core\Web\HTTP\Status::code_404('module');			
 		}
 
+
+		$reflection_method = new \ReflectionMethod($this, $method);
+		// Verify if security is ok
+		foreach ($requested_path->security as $security) {
+			if (!$secutity->handle()) {
+				
+			}
+		}
+		print_r($requested_path);
+		die();		
+		// We know the correct path, now check if all required parameters are available		
+		$required_parameters = $reflection_method->getParameters();
+		$parameters = [];
+		foreach ($required_parameters as $required_parameter) {
+			if (!isset($_GET[$required_parameter->getName()])) {
+				echo $required_parameter->getName() . ' not given';
+				exit;			
+			}
+			$parameters[] = $_GET[$required_parameter->getName()];
+		}
+		$response = $reflection_method->invoke($this, $parameters);
+		echo json_encode($response->get_component_info(), JSON_PRETTY_PRINT);
+		
+
+	
 	}	
 
+	/**
+	 * Resolve the requested path
+	 *
+	 * @access public
+	 * @param string $path
+	 * @return \Skeleton\Application\Api\Path $path
+	 */
+	public static function resolve($request_relative_uri) {
+		$relative_uri_parts = array_values(array_filter(explode('/', $request_relative_uri)));		
+		$relative_uri_parts = array_map('ucfirst', $relative_uri_parts);
+		$application = \Skeleton\Core\Application::get();
+		$endpoint_namespace = $application->endpoint_namespace;
+		
+		$classnames = [];
+		$classnames[] = $endpoint_namespace . implode('\\', $relative_uri_parts);
+
+		if (count($relative_uri_parts) > 1) {
+			array_pop($relative_uri_parts);
+			$classnames[] = $endpoint_namespace . implode('\\', $relative_uri_parts);			
+		}
+
+		foreach ($classnames as $classname) {
+			if (class_exists($classname)) {
+				return new $classname();
+			}
+		}
+				
+		throw new \Exception('No endpoint found for ' . $request_relative_uri);
+	}
 }
