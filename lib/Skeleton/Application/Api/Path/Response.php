@@ -1,6 +1,6 @@
 <?php
 /**
- * Parameter class
+ * Response class
  *
  * @author Gerry Demaret <gerry@tigron.be>
  * @author Christophe Gosiau <christophe@tigron.be>
@@ -8,15 +8,15 @@
 
 namespace Skeleton\Application\Api\Path;
 
-class Parameter {
+class Response {
 
 	/**
-	 * Name
+	 * Code
 	 *
 	 * @access public
-	 * @var string $name
+	 * @var string $code
 	 */
-	public $name;
+	public $code;
 
 	/**
 	 * Description
@@ -24,23 +24,15 @@ class Parameter {
 	 * @access public
 	 * @var string $description
 	 */
-	public $description;
-
-	/**
-	 * Required
-	 *
-	 * @access public
-	 * @var boolean $required
-	 */
-	public $required = false;
+	public $description = '';
 
 	/**
 	 * Type
 	 *
 	 * @access public
-	 * @var string $type
+	 * @var phpDocumentor\Reflection\Type $type
 	 */
-	public $type = '';
+	public $type = null;
 
 	/**
 	 * Get schema
@@ -50,15 +42,7 @@ class Parameter {
 	 */
 	public function get_schema() {
 		$schema = [];
-		$schema['name'] = $this->name;
-		$schema['required'] = $this->required;
-		if ($this->required) {
-			$schema['in'] = 'path';
-		} else {
-			$schema['in'] = 'query';
-		}
 		$schema['schema'] = $this->type->get_schema();
-		$schema['description'] = $this->description;
 		return $schema;
 	}
 }

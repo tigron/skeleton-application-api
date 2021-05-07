@@ -19,19 +19,67 @@ class Api extends \Skeleton\Core\Application {
 	public $endpoint_path = null;
 
 	/**
+	 * Endpoint namespace
+	 *
+	 * @var string $endpoint_namespace
+	 * @access public
+	 */
+	public $endpoint_namespace = null;
+
+	/**
+	 * Component Path
+	 *
+	 * @var string $component_path
+	 * @access public
+	 */
+	public $component_path = null;
+
+	/**
+	 * Component namespace
+	 *
+	 * @var string $component_namespace
+	 * @access public
+	 */
+	public $component_namespace = null;
+
+	/**
+	 * Security Path
+	 *
+	 * @var string $security_path
+	 * @access public
+	 */
+	public $security_path = null;
+
+	/**
+	 * Security namespace
+	 *
+	 * @var string $security_namespace
+	 * @access public
+	 */
+	public $security_namespace = null;	
+
+	/**
 	 * Get details
 	 *
 	 * @access protected
 	 */
 	protected function get_details() {
 		parent::get_details();
-		
-		$this->endpoint_path = $this->path . '/endpoint/';
 
+		$this->endpoint_path = $this->path . '/endpoint/';
+		$this->component_path = $this->path . '/component/';
+		$this->security_path = $this->path . '/security/';		
+		$this->endpoint_namespace = "\\App\\" . ucfirst($this->name) . "\Endpoint\\";
+		$this->component_namespace = "\\App\\" . ucfirst($this->name) . "\Component\\";
+		$this->security_namespace = "\\App\\" . ucfirst($this->name) . "\Security\\";
+		
 		$autoloader = new \Skeleton\Core\Autoloader();
-		$autoloader->add_namespace("\\App\\" . $this->name . "\Endpoint\\", $this->endpoint_path);
+		$autoloader->add_namespace($this->endpoint_namespace, $this->endpoint_path);
+		$autoloader->add_namespace($this->component_namespace, $this->component_path);
+		$autoloader->add_namespace($this->security_namespace, $this->security_path);		
+
 		$autoloader->register();
-	}	
+	}
 
 	/**
 	 * Load the config
@@ -39,6 +87,17 @@ class Api extends \Skeleton\Core\Application {
 	 * @access private
 	 */
 	protected function load_config() {
+		/**
+		 * Set some defaults
+		 */
+		$this->config->csrf_enabled = false;
+		$this->config->replay_enabled = false;
+		$this->config->hostnames = [];
+		$this->config->routes = [];
+		$this->config->route_resolver = function($path) {
+			return \Skeleton\Application\Api\Endpoint::resolve($path);
+		};
+
 		parent::load_config();
 	}
 
@@ -48,17 +107,180 @@ class Api extends \Skeleton\Core\Application {
 	 * @access public
 	 */
 	public function run() {
+
+		try {
+			\Skeleton\Core\Web\Media::detect($this->request_relative_uri);
+		} catch (\Skeleton\Core\Exception\Media\Not\Found $e) {
+			\Skeleton\Core\Web\HTTP\Status::code_404('media');
+		}
+
 		$request = pathinfo($this->request_relative_uri);
-		if (isset($request['extension']) and $request['extension'] == 'json') {
-			$this->run_openapi();
+
+		if ($request['dirname'] == '/' and $request['basename'] == 'openapi.json') {
+			$generator = new \Skeleton\Application\Api\Openapi\Generator();
+			$generator->add_components($this->get_components());
+			$generator->add_endpoints($this->get_endpoints());
+			$generator->add_security($this->get_security());
+			$generator->serve('json');
+
 		}
+
+		if ($request['dirname'] == '/' and $request['filename'] == '') {
+			$template = \Skeleton\Core\Web\Template::get();
+			$template->display('@skeleton-application-api/index.twig');
+			return;
+		}
+
+		/**
+		 * Find the module to load
+		 *
+		 * FIXME: this nested try/catch is not the prettiest of things
+		 */
+		$endpoint = null;
+		try {
+			// Attempt to find the module by matching defined routes
+			$endpoint = $this->route($this->request_relative_uri);
+		} catch (\Exception $e) {
+			try {
+				// Attempt to find a module by matching paths
+				$endpoint = Api\Endpoint::resolve($this->request_relative_uri);
+			} catch (\Exception $e) {
+				if ($this->event_exists('module', 'not_found')) {
+					$this->call_event_if_exists('module', 'not_found');
+				} else {
+					\Skeleton\Core\Web\HTTP\Status::code_404('module');
+				}
+			}
+		}
+
+		if (!is_a($endpoint, 'Skeleton\Application\Api\Endpoint')) {
+			\Skeleton\Core\Web\HTTP\Status::code_404('module');
+		}
+
+		$endpoint->accept_request();
 	}
-	
-	public function run_openapi() {
-		$endpoints = $this->get_endpoints();
-		foreach ($endpoints as $endpoint) {
-			print_r($endpoint->get_paths());
+
+	/**
+	 * Search module
+	 *
+	 * @access public
+	 * @param string $request_uri
+	 */
+	public function route($request_uri) {
+		/**
+		 * Remove leading slash
+		 */
+		if ($request_uri[0] == '/') {
+			$request_uri = substr($request_uri, 1);
 		}
+
+		if (substr($request_uri, -1) == '/') {
+			$request_uri = substr($request_uri, 0, strlen($request_uri)-1);
+		}
+
+		if (!isset($this->config->base_uri)) {
+			$this->config->base_uri = '/';
+		}
+
+		if (strpos( '/' . $request_uri, $this->config->base_uri) === 0) {
+			$request_uri = substr($request_uri, strlen($this->config->base_uri)-1);
+		}
+		$request_parts = explode('/', $request_uri);
+
+		$routes = $this->config->routes;
+
+		/**
+		 * We need to find the route that matches the most the fixed parts
+		 */
+		$matched_module = null;
+		$best_matches_fixed_parts = 0;
+		$route = '';
+
+		foreach ($routes as $module => $uris) {
+			foreach ($uris as $uri) {
+				if (isset($uri[0]) AND $uri[0] == '/') {
+					$uri = substr($uri, 1);
+				}
+				$parts = explode('/', $uri);
+				$matches_fixed_parts = 0;
+				$match = true;
+
+				foreach ($parts as $key => $value) {
+					if (!isset($request_parts[$key])) {
+						$match = false;
+						continue;
+					}
+
+					if (isset($value[0]) AND $value[0] == '$') {
+						if ($value === '$action') {
+							// Check if the given parameter defines an action
+							$method = strtolower($_SERVER['REQUEST_METHOD']) . '_' . $request_parts[$key];
+							if (is_callable([$module, $method])) {
+								$matches_fixed_parts++;
+								continue;
+							}
+						}
+
+						preg_match_all('/(\[(.*?)\])/', $value, $matches);
+						if (!isset($matches[2][0])) {
+							/**
+							 *  There are no possible values for the variable
+							 *  The match is valid
+							 */
+							 continue;
+						}
+
+						// This is a variable, we do not increase the fixed parts
+						continue;
+					}
+
+
+					if ($value == $request_parts[$key]) {
+						$matches_fixed_parts++;
+						continue;
+					}
+
+
+					$match = false;
+				}
+
+
+
+				if ($match and count($parts) == count($request_parts)) {
+					if ($matches_fixed_parts >= $best_matches_fixed_parts) {
+						$best_matches_fixed_parts = $matches_fixed_parts;
+						$route = $uri;
+						$matched_module = $module;
+					}
+				}
+			}
+		}
+
+		if ($matched_module === null) {
+			throw new \Exception('No matching route found');
+		}
+
+		/**
+		 * We now have the correct route
+		 * Now fill in the GET-parameters
+		 */
+		$parts = explode('/', $route);
+
+		foreach ($parts as $key => $value) {
+			if (isset($value[0]) and $value[0] == '$') {
+				$value = substr($value, 1);
+				if (strpos($value, '[') !== false) {
+					$value = substr($value, 0, strpos($value, '['));
+				}
+				$_GET[$value] = $request_parts[$key];
+				$_REQUEST[$value] = $request_parts[$key];
+			}
+		}
+
+		$request_relative_uri = str_replace($this->endpoint_namespace, '', $matched_module);
+
+		$request_relative_uri = str_replace('_', '/', $request_relative_uri);
+		return \Skeleton\Application\Api\Endpoint::resolve($request_relative_uri);
 	}
 
 	/**
@@ -86,6 +308,60 @@ class Api extends \Skeleton\Core\Application {
 			$endpoints[] = $class;
 		}
 		return $endpoints;
+	}
+
+	/**
+	 * Get components
+	 *
+	 * @access public
+	 */
+	public function get_components() {
+		$iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->component_path));
+		$files = array_filter(iterator_to_array($iterator), function($file) {
+			return $file->isFile();
+		});
+		$components = [];
+
+		foreach ($files as $file) {
+			if ($file->getExtension() != 'php') {
+				continue;
+			}
+			$pathinfo = pathinfo($file->getFileName());
+			$component = $pathinfo['filename'];
+			$component = str_replace(DIRECTORY_SEPARATOR, '\\', $component);
+
+			$classname = "\\App\\" . ucfirst($this->name) . "\Component\\" . $component;
+			$class = new $classname();
+			$components[] = $class;
+		}
+		return $components;
+	}
+
+	/**
+	 * Get security
+	 *
+	 * @access public
+	 */
+	public function get_security() {
+		$iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->security_path));
+		$files = array_filter(iterator_to_array($iterator), function($file) {
+			return $file->isFile();
+		});
+		$securities = [];
+
+		foreach ($files as $file) {
+			if ($file->getExtension() != 'php') {
+				continue;
+			}
+			$pathinfo = pathinfo($file->getFileName());
+			$security = $pathinfo['filename'];
+			$security = str_replace(DIRECTORY_SEPARATOR, '\\', $security);
+
+			$classname = "\\App\\" . ucfirst($this->name) . "\Security\\" . $security;
+			$class = new $classname();
+			$securities[] = $class;
+		}
+		return $securities;
 	}	
 
 }
