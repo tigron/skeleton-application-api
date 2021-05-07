@@ -20,5 +20,12 @@ abstract class Http extends \Skeleton\Application\Api\Security {
 		return 'http';
 	}
 
+	/**
+	 * Handle the security
+	 *
+	 * @access public
+	 */
+	abstract public function handle();
+
 
 }

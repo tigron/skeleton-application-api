@@ -30,9 +30,9 @@ class Response {
 	 * Type
 	 *
 	 * @access public
-	 * @var phpDocumentor\Reflection\Type $type
+	 * @var phpDocumentor\Reflection\Type $content
 	 */
-	public $type = null;
+	public $content = null;
 
 	/**
 	 * Get schema
@@ -42,7 +42,7 @@ class Response {
 	 */
 	public function get_schema() {
 		$schema = [];
-		$schema['schema'] = $this->type->get_schema();
+		$schema['schema'] = $this->content->get_schema();
 		return $schema;
 	}
 }
