@@ -8,7 +8,7 @@
 
 namespace Skeleton\Application\Api\Security\Http;
 
-class Basic extends \Skeleton\Application\Api\Security\Http{
+abstract class Basic extends \Skeleton\Application\Api\Security\Http{
 
 	/**
 	 * Get the type

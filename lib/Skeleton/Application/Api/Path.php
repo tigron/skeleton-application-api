@@ -68,9 +68,9 @@ class Path {
 	 * Responses
 	 *
 	 * @access public
-	 * @var Response[] $responses
+	 * @var Response $responses
 	 */
-	public $responses = [];
+	public $response = null;
 
 	/**
 	 * Security
@@ -157,17 +157,23 @@ class Path {
 			}
 		}
 
-		if (count($this->responses) == 0) {
+		if ($this->response === null) {
 			throw new \Exception('No response defined for path ' . $this->name . '/' . $this->operation);
 		}
 
-		if (count($this->responses) > 0) {
-			$schema[$route][$this->operation]['responses'] = [];
-			foreach ($this->responses as $response) {
-				$schema[$route][$this->operation]['responses'][200]['description'] = $response->description;
-				$schema[$route][$this->operation]['responses'][200]['content']['application/json'] = $response->get_schema();
+		$schema[$route][$this->operation]['responses'] = [];
+		$schema[$route][$this->operation]['responses'][200]['description'] = $this->response->description;
+		$schema[$route][$this->operation]['responses'][200]['content']['application/json'] = $this->response->get_schema();
+
+		/**
+		 * If headers are specified, we add them to every response
+		 * This is a limitation of not using a Response object
+		 */
+		if (count($this->headers) > 0) {
+			foreach ($this->headers as $key => $header) {
+				$schema[$route][$this->operation]['responses'][200]['headers'][$header]['type'] = 'string';
 			}
-		}
+		}		
 
 		if (count($this->security) > 0) {
 			$schema[$route][$this->operation]['security'] = [];
@@ -175,7 +181,6 @@ class Path {
 				$schema[$route][$this->operation]['security'][] = [ $security->get_name() => [] ];
 			}
 		}
-
 
 		return $schema;
 	}
@@ -205,7 +210,7 @@ class Path {
 				if (strpos($method->name, $operation) !== 0) {
 					continue;
 				}
-				$path = new Path();
+				$path = new self();
 				$path->endpoint = $endpoint;
 				$path->operation = $operation;
 				$path->method = $method->name;
@@ -221,54 +226,62 @@ class Path {
 					$factory  = \phpDocumentor\Reflection\DocBlockFactory::createInstance();
 					$docblock = $factory->create($docblock);
 					$path->summary = $docblock->getSummary();
-
-					/**
-					 * Add parameters by docblock
-					 */
-					$params = $docblock->getTagsByName('param');
-					foreach ($params as $param) {
-						$parameter = new Parameter();
-						$parameter->name = $param->getVariableName();
-						$parameter->description = $param->getDescription()->getBodyTemplate();
-						$parameter->type = \Skeleton\Application\Api\Media\Type::create_for_reflection_type($param->getType());
-						$path->parameters[] = $parameter;
-					}
-
-					/**
-					 * Add return values by docblock
-					 */
-					$returns = $docblock->getTagsByName('return');
-
-					if (count($returns) > 1) {
-						throw new \Exception('More than 1 return value specified in docblock for method ' . $endpoint->get_name() . '/' . $method->name);
-					} elseif (count($returns) == 1) {
-						$tag = array_shift($returns);
-						$response = new Response();
-						$response->code = 200;
-						$response->description = $tag->getDescription()->getBodyTemplate();
-						$media_type = \Skeleton\Application\Api\Media\Type::create_for_reflection_type($tag->getType());
-						$response->type = $media_type;
-						$path->responses[] = $response;
-					}
-
-					/**
-					 * Add security by docblock
-					 */
-					$securities = $docblock->getTagsByName('security');
-					foreach ($securities as $security) {
-						$classname = $security->getDescription()->getBodyTemplate();
-						if (!class_exists($classname)) {
-//							throw new \Exception('Incorrect security specified in docblock for method ' . $endpoint->get_name() . '/' . $method->name);
-						}
-						$class = new $classname();
-						if (!is_a($class, '\Skeleton\Application\Api\Security')) {
-							throw new \Exception('Incorrect security specified in docblock for method ' . $endpoint->get_name() . '/' . $method->name);
-						}
-						$path->security[] = $class;
-					}
-
 				} catch (\Webmozart\Assert\InvalidArgumentException $e) {
-					// No docblock found
+					// No docblock found, we ignore this method
+					continue;
+				}
+
+				/**
+				 * Add parameters by docblock
+				 */
+				$params = $docblock->getTagsByName('param');
+				foreach ($params as $param) {
+					$parameter = new Parameter();
+					$parameter->name = $param->getVariableName();
+					$parameter->description = $param->getDescription()->getBodyTemplate();
+					$parameter->type = \Skeleton\Application\Api\Media\Type::create_for_reflection_type($param->getType());
+					$path->parameters[] = $parameter;
+				}
+
+				/**
+				 * Add return values by docblock
+				 */
+				$returns = $docblock->getTagsByName('return');
+
+				if (count($returns) > 1) {
+					throw new \Exception('More than 1 return value specified in docblock for method ' . $endpoint->get_name() . '/' . $method->name);
+				} elseif (count($returns) == 1) {
+					$tag = array_shift($returns);
+					$response = new Response();
+					$response->code = 200;
+					$response->description = $tag->getDescription()->getBodyTemplate();
+					$media_type = \Skeleton\Application\Api\Media\Type::create_for_reflection_type($tag->getType());
+					$response->content = $media_type;
+					$path->response = $response;
+				}
+
+				/**
+				 * Add headers by docblock
+				 */
+				$headers = $docblock->getTagsByName('header');
+				foreach ($headers as $header) {
+					$path->headers[] = $header->getDescription()->getBodyTemplate();
+				}
+
+				/**
+				 * Add headers by docblock
+				 */
+				$securities = $docblock->getTagsByName('security');
+				foreach ($securities as $security) {
+					$classname = $security->getDescription()->getBodyTemplate();
+					if (!class_exists($classname)) {
+						throw new \Exception('Incorrect security specified in docblock for method ' . $endpoint->get_name() . '/' . $method->name);
+					}
+					$class = new $classname();
+					if (!is_a($class, '\Skeleton\Application\Api\Security')) {
+						throw new \Exception('Incorrect security specified in docblock for method ' . $endpoint->get_name() . '/' . $method->name);
+					}
+					$path->security[] = $class;
 				}
 
 				/**
