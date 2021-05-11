@@ -73,6 +73,7 @@ class Generator {
 	private function build() {
 		// Get the curent API application
 		$application = \Skeleton\Core\Application::get();
+		$config = $application->config;
 
 		$schema = [];
 		$schema['openapi'] = '3.0.2';
@@ -81,13 +82,41 @@ class Generator {
 			'url' => '/',
 		];
 
+		if (!isset($config->title)) {
+			throw new \Exception('Please specify "title" configuration');
+		}
+
 		$schema['info'] = [
-			'version' => '1.0.0',
+			'version' => $config->version,
+			'title' => $config->title,
+		];
+
+		if (isset($config->terms)) {
+			$schema['info']['termsOfService'] = $config->terms;
+		}
+		if (isset($config->description)) {
+			$schema['info']['description'] = $config->description;
+		}
+
+		if (isset($config->contact)) {
+			$contact = $config->contact;
+			$schema['info']['contact'] = [];
+			if (isset($contact['name'])) {
+				$schema['info']['contact']['name'] = $contact['name'];
+			}
+			if (isset($contact['url'])) {
+				$schema['info']['contact']['url'] = $contact['url'];
+			}
+			if (isset($contact['email'])) {
+				$schema['info']['contact']['email'] = $contact['email'];
+			}			
+		}		
+/*
 			'title'=> 'Swagger Petstore',
 			'license' => [
 				'name' => 'MIT',
 			],
-		];
+		];*/
 
 		$schema['paths'] = [];
 		foreach ($this->endpoints as $endpoint) {
@@ -116,9 +145,9 @@ class Generator {
 				$schema['components']['schemas'][$name]['properties'][strtolower($key)] = $property;
 			}
 		}
-		$schema['components']['schemas']['http_basic'] = [
-			'type' => 'string'
-		];
+//		$schema['components']['schemas']['http_basic'] = [
+//			'type' => 'string'
+//		];
 		return $schema;
 	}
 

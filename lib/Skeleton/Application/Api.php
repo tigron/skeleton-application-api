@@ -56,7 +56,7 @@ class Api extends \Skeleton\Core\Application {
 	 * @var string $security_namespace
 	 * @access public
 	 */
-	public $security_namespace = null;	
+	public $security_namespace = null;
 
 	/**
 	 * Get details
@@ -68,15 +68,15 @@ class Api extends \Skeleton\Core\Application {
 
 		$this->endpoint_path = $this->path . '/endpoint/';
 		$this->component_path = $this->path . '/component/';
-		$this->security_path = $this->path . '/security/';		
+		$this->security_path = $this->path . '/security/';
 		$this->endpoint_namespace = "\\App\\" . ucfirst($this->name) . "\Endpoint\\";
 		$this->component_namespace = "\\App\\" . ucfirst($this->name) . "\Component\\";
 		$this->security_namespace = "\\App\\" . ucfirst($this->name) . "\Security\\";
-		
+
 		$autoloader = new \Skeleton\Core\Autoloader();
 		$autoloader->add_namespace($this->endpoint_namespace, $this->endpoint_path);
 		$autoloader->add_namespace($this->component_namespace, $this->component_path);
-		$autoloader->add_namespace($this->security_namespace, $this->security_path);		
+		$autoloader->add_namespace($this->security_namespace, $this->security_path);
 
 		$autoloader->register();
 	}
@@ -97,6 +97,7 @@ class Api extends \Skeleton\Core\Application {
 		$this->config->route_resolver = function($path) {
 			return \Skeleton\Application\Api\Endpoint::resolve($path);
 		};
+		$this->config->version = '1.0.0';
 
 		parent::load_config();
 	}
@@ -343,6 +344,9 @@ class Api extends \Skeleton\Core\Application {
 	 * @access public
 	 */
 	public function get_security() {
+		if (!file_exists($this->security_path)) {
+			return [];
+		}
 		$iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->security_path));
 		$files = array_filter(iterator_to_array($iterator), function($file) {
 			return $file->isFile();
@@ -362,6 +366,6 @@ class Api extends \Skeleton\Core\Application {
 			$securities[] = $class;
 		}
 		return $securities;
-	}	
+	}
 
 }
