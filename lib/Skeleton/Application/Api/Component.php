@@ -59,8 +59,13 @@ trait Component {
 	 */
 	public function get_component_info() {
 		$info = [];
+
 		foreach ($this->get_component_properties() as $field => $definition) {
-			$info[$field] = $this->$field;
+			if (!isset($this->$field)) {
+				$info[$field] = null;
+			} else {
+				$info[$field] = $this->$field;
+			}
 		}
 		return $info;
 	}
