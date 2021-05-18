@@ -62,9 +62,9 @@ abstract class Endpoint {
 				$requested_path = $path;
 			}
 		}
-		
+
 		if ($requested_path === null) {
-			\Skeleton\Core\Web\HTTP\Status::code_404('module');			
+			\Skeleton\Core\Web\HTTP\Status::code_404('module');
 		}
 
 
@@ -72,27 +72,26 @@ abstract class Endpoint {
 		// Verify if security is ok
 		foreach ($requested_path->security as $security) {
 			if (!$secutity->handle()) {
-				
+
 			}
 		}
-		print_r($requested_path);
-		die();		
-		// We know the correct path, now check if all required parameters are available		
+
+		// We know the correct path, now check if all required parameters are available
 		$required_parameters = $reflection_method->getParameters();
 		$parameters = [];
 		foreach ($required_parameters as $required_parameter) {
 			if (!isset($_GET[$required_parameter->getName()])) {
 				echo $required_parameter->getName() . ' not given';
-				exit;			
+				exit;
 			}
 			$parameters[] = $_GET[$required_parameter->getName()];
 		}
-		$response = $reflection_method->invoke($this, $parameters);
+		$response = $reflection_method->invokeArgs($this, $parameters);
 		echo json_encode($response->get_component_info(), JSON_PRETTY_PRINT);
-		
 
-	
-	}	
+
+
+	}
 
 	/**
 	 * Resolve the requested path
@@ -102,17 +101,17 @@ abstract class Endpoint {
 	 * @return \Skeleton\Application\Api\Path $path
 	 */
 	public static function resolve($request_relative_uri) {
-		$relative_uri_parts = array_values(array_filter(explode('/', $request_relative_uri)));		
+		$relative_uri_parts = array_values(array_filter(explode('/', $request_relative_uri)));
 		$relative_uri_parts = array_map('ucfirst', $relative_uri_parts);
 		$application = \Skeleton\Core\Application::get();
 		$endpoint_namespace = $application->endpoint_namespace;
-		
+
 		$classnames = [];
 		$classnames[] = $endpoint_namespace . implode('\\', $relative_uri_parts);
 
 		if (count($relative_uri_parts) > 1) {
 			array_pop($relative_uri_parts);
-			$classnames[] = $endpoint_namespace . implode('\\', $relative_uri_parts);			
+			$classnames[] = $endpoint_namespace . implode('\\', $relative_uri_parts);
 		}
 
 		foreach ($classnames as $classname) {
@@ -120,7 +119,7 @@ abstract class Endpoint {
 				return new $classname();
 			}
 		}
-				
+
 		throw new \Exception('No endpoint found for ' . $request_relative_uri);
 	}
 }
