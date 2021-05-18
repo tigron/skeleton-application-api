@@ -87,10 +87,15 @@ abstract class Endpoint {
 			$parameters[] = $_GET[$required_parameter->getName()];
 		}
 		$response = $reflection_method->invokeArgs($this, $parameters);
-		echo json_encode($response->get_component_info(), JSON_PRETTY_PRINT);
-
-
-
+		if (is_array($response)) {
+			$results = [];
+			foreach ($response as $key => $object) {
+				$results[$key] = $object->get_component_info();
+			}
+			echo json_encode($results, JSON_PRETTY_PRINT);
+		} else {
+			echo json_encode($response->get_component_info(), JSON_PRETTY_PRINT);
+		}
 	}
 
 	/**

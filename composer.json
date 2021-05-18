@@ -9,6 +9,9 @@
             "email": "support@tigron.be"
         }
     ],
+    "require": {
+		"tigron/skeleton-core": ">=2"
+    },
     "suggest": {
         "tigron/skeleton-template": "*"
     },
