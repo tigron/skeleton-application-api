@@ -110,7 +110,7 @@ class Type {
 
 		if ($this->type == 'object') {
 			$component = str_replace($application->component_namespace, '', $this->value_type);
-			$schema['$ref'] = '#/components/schemas/' . strtolower($component);
+			$schema['$ref'] = '#/components/schemas/' . $component;
 		}
 
 		if ($this->type == 'array') {

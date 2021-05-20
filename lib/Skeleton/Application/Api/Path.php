@@ -132,9 +132,9 @@ class Path {
 			$params[$parameter->name] = '{' . $parameter->name . '}';
 		}
 		if (count($params) == 0) {
-			return $this->endpoint->get_name();
+			return $this->endpoint->_get_name();
 		}
-		$query = $this->endpoint->get_name() . '?';
+		$query = $this->endpoint->_get_name() . '?';
 		foreach ($params as $key => $value) {
 			$query .= $key . '=' . $value . '&';
 		}
@@ -191,7 +191,7 @@ class Path {
 			$schema[$route] = [];
 		}
 		$schema[$route][$this->operation] = [];
-		$schema[$route][$this->operation]['tags'] = [ $this->endpoint->get_name() ];
+		$schema[$route][$this->operation]['tags'] = [ $this->endpoint->_get_name() ];
 		$schema[$route][$this->operation]['summary'] = $this->summary;
 
 		if (count($this->parameters) > 0) {
@@ -205,13 +205,14 @@ class Path {
 			throw new \Exception('No response defined for path ' . $this->name . '/' . $this->operation);
 		}
 
+		$schema[$route][$this->operation]['responses'] = [];
 		foreach ($this->responses as $response) {
 			$response_schema = $response->get_schema();
-			$schema[$route][$this->operation]['responses'] = [];
 			$schema[$route][$this->operation]['responses'][$response->code]['description'] = $response->description;
 			if ($response_schema !== null) {
 				$schema[$route][$this->operation]['responses'][$response->code]['content']['application/json'] = $response_schema;
 			}
+
 			/**
 			 * If headers are specified, we add them to every response
 			 * This is a limitation of not using a Response object
@@ -298,7 +299,7 @@ class Path {
 				$returns = $docblock->getTagsByName('return');
 
 				if (count($returns) > 1) {
-					throw new \Exception('More than 1 return value specified in docblock for method ' . $endpoint->get_name() . '/' . $method->name);
+					throw new \Exception('More than 1 return value specified in docblock for method ' . $endpoint->_get_name() . '/' . $method->name);
 				} elseif (count($returns) == 1) {
 					$tag = array_shift($returns);
 					$response = new Response();
@@ -316,7 +317,7 @@ class Path {
 				foreach ($exceptions as $exception) {
 					$classname = (string)$exception->getType()->getFqsen();
 					if (!class_exists($classname)) {
-						throw new \Exception('Incorrect exception specified in docblock for method ' . $endpoint->get_name() . '/' . $method->name);
+						throw new \Exception('Incorrect exception specified in docblock for method ' . $endpoint->_get_name() . '/' . $method->name);
 					}
 					$class = new $classname();
 					$response = new Response();
@@ -340,11 +341,11 @@ class Path {
 				foreach ($securities as $security) {
 					$classname = $security->getDescription()->getBodyTemplate();
 					if (!class_exists($classname)) {
-						throw new \Exception('Incorrect security specified in docblock for method ' . $endpoint->get_name() . '/' . $method->name);
+						throw new \Exception('Incorrect security specified in docblock for method ' . $endpoint->_get_name() . '/' . $method->name);
 					}
 					$class = new $classname();
 					if (!is_a($class, '\Skeleton\Application\Api\Security')) {
-						throw new \Exception('Incorrect security specified in docblock for method ' . $endpoint->get_name() . '/' . $method->name);
+						throw new \Exception('Incorrect security specified in docblock for method ' . $endpoint->_get_name() . '/' . $method->name);
 					}
 					$path->security[] = $class;
 					$path->responses = array_merge($path->responses, $class->get_responses());
@@ -359,15 +360,15 @@ class Path {
 					try {
 						$parameter = $path->get_parameter_by_name($param->name);
 					} catch (\Exception $e) {
-						throw new \Exception('Required parameter ' . $param->name . ' for method ' . $endpoint->get_name() . '/' . $method->name . ' is not mentioned in docblock');
+						throw new \Exception('Required parameter ' . $param->name . ' for method ' . $endpoint->_get_name() . '/' . $method->name . ' is not mentioned in docblock');
 					}
 					$parameter->required = true;
 					$parameter->in = 'path';
 				}
-
 				$paths[] = $path;
 			}
 		}
+
 		return $paths;
 	}
 
