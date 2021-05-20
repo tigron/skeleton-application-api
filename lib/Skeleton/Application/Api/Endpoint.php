@@ -73,7 +73,7 @@ abstract class Endpoint {
 			\Skeleton\Core\Web\HTTP\Status::code_404('endpoint');
 		}
 
-		$paths = $this->get_paths();
+		$paths = $this->_get_paths();
 		$requested_path = null;
 		foreach ($paths as $path) {
 			if ($path->method == $method) {
