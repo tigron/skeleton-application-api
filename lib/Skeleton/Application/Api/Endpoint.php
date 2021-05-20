@@ -19,7 +19,7 @@ abstract class Endpoint {
 	 * @access public
 	 * @return string $name
 	 */
-	public function get_name() {
+	public function _get_name() {
 		$api = \Skeleton\Core\Application::get();
 		$class = new \ReflectionClass($this);
 		$filename = $class->getFileName();
@@ -29,12 +29,30 @@ abstract class Endpoint {
 	}
 
 	/**
+	 * Get description
+	 *
+	 * @access public
+	 * @return string $description
+	 */
+	public function _get_description() {
+		$reflection = new \ReflectionClass($this);
+		$docblock = $reflection->getDocComment();
+		try {
+			$factory  = \phpDocumentor\Reflection\DocBlockFactory::createInstance();
+			$docblock = $factory->create($docblock);
+			return $docblock->getSummary();
+		} catch (\Exception $e) {
+			return "";
+		}
+	}
+
+	/**
 	 * Get paths
 	 *
 	 * @access public
 	 * @return \Skeleton\Application\Api\Path[] $paths
 	 */
-	public function get_paths() {
+	public function _get_paths() {
 		return \Skeleton\Application\Api\Path::get_by_endpoint($this);
 	}
 

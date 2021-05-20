@@ -312,10 +312,7 @@ class Api extends \Skeleton\Core\Application {
 	 * @access public
 	 */
 	public function get_endpoints() {
-		$files= [];
-		foreach (glob($this->endpoint_path . '/*.php') as $filename) {
-			$files[] = $filename;
-		}
+		$files = Api\Util::rglob($this->endpoint_path . '*.php');
 
 		$endpoints = [];
 
@@ -337,17 +334,20 @@ class Api extends \Skeleton\Core\Application {
 	 * @access public
 	 */
 	public function get_components() {
-		$files= [];
-		foreach (glob($this->component_path . '/*.php') as $filename) {
-			$files[] = $filename;
-		}
+		$files = Api\Util::rglob($this->component_path . '*.php');
 
 		$components = [];
 
 		foreach ($files as $file) {
+			$file = str_replace($this->component_path, '', $file);
+
 			$pathinfo = pathinfo($file);
-			$component = $pathinfo['filename'];
-			$component = str_replace(DIRECTORY_SEPARATOR, '\\', $component);
+			$classname = '';
+			if ($pathinfo['dirname'] !== '.') {
+				$classname .= $pathinfo['dirname'] . '/';
+			}
+			$classname .= $pathinfo['filename'];
+			$component = str_replace(DIRECTORY_SEPARATOR, '\\', $classname);
 
 			$classname = "\\App\\" . ucfirst($this->name) . "\Component\\" . $component;
 			$class = new $classname();
@@ -365,10 +365,7 @@ class Api extends \Skeleton\Core\Application {
 		if (!file_exists($this->security_path)) {
 			return [];
 		}
-		$files= [];
-		foreach (glob($this->security_path . '/*.php') as $filename) {
-			$files[] = $filename;
-		}
+		$files = Api\Util::rglob($this->security_path . '*.php');
 
 		$securities = [];
 

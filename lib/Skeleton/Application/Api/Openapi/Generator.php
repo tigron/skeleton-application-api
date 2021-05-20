@@ -87,14 +87,14 @@ class Generator {
 		$schema = [];
 		$schema['openapi'] = '3.0.2';
 		$schema['servers'] = [];
-		$schema['servers'][] = [
-			'url' => '/',
-		];
 
 		if (!isset($config->title)) {
 			throw new \Exception('Please specify "title" configuration');
 		}
 
+		/**
+		 * Generate the 'info'
+		 */
 		$schema['info'] = [
 			'version' => $config->version,
 			'title' => $config->title,
@@ -120,22 +120,34 @@ class Generator {
 				$schema['info']['contact']['email'] = $contact['email'];
 			}
 		}
-/*
-			'title'=> 'Swagger Petstore',
-			'license' => [
-				'name' => 'MIT',
-			],
-		];*/
 
-		$schema['paths'] = [];
+		/**
+		 * Generate the 'tags'
+		 */
+		$schema['tags'] = [];
 		foreach ($this->endpoints as $endpoint) {
-			$paths = $endpoint->get_paths();
+			$schema['tags'][] = [
+				'name' => $endpoint->_get_name(),
+				'description' => $endpoint->_get_description(),
+			];
+		}
+
+		/**
+		 * Generate the 'paths'
+		 */
+		$schema['paths'] = [];
+
+		foreach ($this->endpoints as $endpoint) {
+			$paths = $endpoint->_get_paths();
 
 			foreach ($paths as $path) {
 				$schema['paths'] = array_merge_recursive($schema['paths'], $path->get_schema());
 			}
 		}
 
+		/**
+		 * Generate the 'components'
+		 */
 		$schema['components'] = [];
 		$schema['components']['securitySchemes'] = [];
 		foreach ($this->security as $security) {
@@ -144,7 +156,6 @@ class Generator {
 		$schema['components']['schemas'] = [];
 		foreach ($this->components as $component) {
 			$name = str_replace($application->component_namespace, '', '\\' . get_class($component));
-			$name = strtolower($name);
 			$schema['components']['schemas'][$name] = [
 				'properties' => [],
 				'type' => 'object',
@@ -154,9 +165,10 @@ class Generator {
 				$schema['components']['schemas'][$name]['properties'][$key] = $property->get_schema();
 			}
 		}
-//		$schema['components']['schemas']['http_basic'] = [
-//			'type' => 'string'
-//		];
+
+		/**
+		 * Return the final schema
+		 */
 		return $schema;
 	}
 
