@@ -35,6 +35,14 @@ class Parameter {
 	public $required = false;
 
 	/**
+	 * In
+	 *
+	 * @access public
+	 * @var string $in
+	 */
+	public $in = 'query';	
+
+	/**
 	 * Type
 	 *
 	 * @access public
@@ -52,11 +60,7 @@ class Parameter {
 		$schema = [];
 		$schema['name'] = $this->name;
 		$schema['required'] = $this->required;
-		if ($this->required) {
-			$schema['in'] = 'path';
-		} else {
-			$schema['in'] = 'query';
-		}
+		$schema['in'] = $this->in;
 		$schema['schema'] = $this->type->get_schema();
 		$schema['description'] = $this->description;
 		return $schema;
