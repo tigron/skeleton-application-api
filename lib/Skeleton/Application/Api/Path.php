@@ -68,9 +68,9 @@ class Path {
 	 * Responses
 	 *
 	 * @access public
-	 * @var Response $responses
+	 * @var Response[] $responses
 	 */
-	public $response = null;
+	public $responses = [];
 
 	/**
 	 * Security
@@ -79,6 +79,14 @@ class Path {
 	 * @var Security[] $security
 	 */
 	public $security = [];
+
+	/**
+	 * Headers
+	 *
+	 * @access public
+	 * @var string[] $headers
+	 */
+	public $headers = [];
 
 	/**
 	 * Endpoint
@@ -110,6 +118,9 @@ class Path {
 	 * @return string $route
 	 */
 	public function get_route() {
+		/**
+		 * 1. Create the complete raw url for this path
+		 */
 		$params = [];
 		if (isset($this->action) and !empty($this->action)) {
 			$params['action'] = $this->action;
@@ -128,7 +139,39 @@ class Path {
 			$query .= $key . '=' . $value . '&';
 		}
 		$query = rtrim($query, '&');
+
+		/**
+		 * 2. Check for existing routes, if so rewrite the raw url
+		 */
 		$query = \Skeleton\Core\Util::rewrite_reverse($query);
+
+		/**
+		 * 3. We don't want to show $_GET parameters in specifications. Let's
+		 * clean them. Important: $_GET['action'] cannot be removed.
+		 */
+		$parsed = parse_url($query);
+		if (isset($parsed['query'])) {
+			parse_str($parsed['query'], $get_variables);
+			foreach ($get_variables as $key => $value) {
+				if ($key == 'action') {
+					continue;
+				}
+				unset($get_variables[$key]);
+				/**
+				 * If a variable is removed, we have to change its properties:
+				 * - it is still required
+				 * - they should appear in 'query', not in 'path'
+				 */
+				$parameter = $this->get_parameter_by_name($key);
+				$parameter->in = 'query';
+			}
+			$query = $parsed['path'] . '?';
+			foreach ($get_variables as $key => $value) {
+				$query .= $key . '=' . $value . '&';
+			}
+			$query = rtrim($query, '&');
+			$query = rtrim($query, '?');
+		}
 
 		return $query;
 	}
@@ -143,6 +186,7 @@ class Path {
 		$schema = [];
 
 		$route = $this->get_route();
+
 		if (!isset($schema[$route])) {
 			$schema[$route] = [];
 		}
@@ -157,29 +201,34 @@ class Path {
 			}
 		}
 
-		if ($this->response === null) {
+		if (count($this->responses) == 0) {
 			throw new \Exception('No response defined for path ' . $this->name . '/' . $this->operation);
 		}
 
-		$schema[$route][$this->operation]['responses'] = [];
-		$schema[$route][$this->operation]['responses'][200]['description'] = $this->response->description;
-		$schema[$route][$this->operation]['responses'][200]['content']['application/json'] = $this->response->get_schema();
-
-		/**
-		 * If headers are specified, we add them to every response
-		 * This is a limitation of not using a Response object
-		 */
-		if (count($this->headers) > 0) {
-			foreach ($this->headers as $key => $header) {
-				$schema[$route][$this->operation]['responses'][200]['headers'][$header]['type'] = 'string';
+		foreach ($this->responses as $response) {
+			$response_schema = $response->get_schema();
+			$schema[$route][$this->operation]['responses'] = [];
+			$schema[$route][$this->operation]['responses'][$response->code]['description'] = $response->description;
+			if ($response_schema !== null) {
+				$schema[$route][$this->operation]['responses'][$response->code]['content']['application/json'] = $response_schema;
 			}
-		}		
+			/**
+			 * If headers are specified, we add them to every response
+			 * This is a limitation of not using a Response object
+			 */
+			if (count($this->headers) > 0) {
+				foreach ($this->headers as $key => $header) {
+					$schema[$route][$this->operation]['responses'][$response->code]['headers'][$header]['type'] = 'string';
+				}
+			}
+		}
 
 		if (count($this->security) > 0) {
 			$schema[$route][$this->operation]['security'] = [];
 			foreach ($this->security as $security) {
 				$schema[$route][$this->operation]['security'][] = [ $security->get_name() => [] ];
 			}
+
 		}
 
 		return $schema;
@@ -257,7 +306,23 @@ class Path {
 					$response->description = $tag->getDescription()->getBodyTemplate();
 					$media_type = \Skeleton\Application\Api\Media\Type::create_for_reflection_type($tag->getType());
 					$response->content = $media_type;
-					$path->response = $response;
+					$path->responses[] = $response;
+				}
+				/**
+				 * If an exception can be thrown, add it as a possible response
+				 */
+				$exceptions = $docblock->getTagsByName('throws');
+
+				foreach ($exceptions as $exception) {
+					$classname = (string)$exception->getType()->getFqsen();
+					if (!class_exists($classname)) {
+						throw new \Exception('Incorrect exception specified in docblock for method ' . $endpoint->get_name() . '/' . $method->name);
+					}
+					$class = new $classname();
+					$response = new Response();
+					$response->code = $class->getCode();
+					$response->description = $class->getMessage();
+					$path->responses[] = $response;
 				}
 
 				/**
@@ -269,7 +334,7 @@ class Path {
 				}
 
 				/**
-				 * Add headers by docblock
+				 * Add security by docblock
 				 */
 				$securities = $docblock->getTagsByName('security');
 				foreach ($securities as $security) {
@@ -282,6 +347,8 @@ class Path {
 						throw new \Exception('Incorrect security specified in docblock for method ' . $endpoint->get_name() . '/' . $method->name);
 					}
 					$path->security[] = $class;
+					$path->responses = array_merge($path->responses, $class->get_responses());
+					$path->headers = array_merge($path->headers, $class->get_headers());
 				}
 
 				/**
@@ -295,6 +362,7 @@ class Path {
 						throw new \Exception('Required parameter ' . $param->name . ' for method ' . $endpoint->get_name() . '/' . $method->name . ' is not mentioned in docblock');
 					}
 					$parameter->required = true;
+					$parameter->in = 'path';
 				}
 
 				$paths[] = $path;

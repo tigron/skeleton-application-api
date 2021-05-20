@@ -24,29 +24,7 @@ trait Component {
 		$definition = $db->get_table_definition($table);
 
 		foreach ($definition as $field) {
-			$type = null;
-			$format = null;
-			if (strpos($field['Type'], 'int') === 0) {
-				$type = 'integer';
-				$format = 'int64';
-			} elseif (strpos($field['Type'], 'varchar') === 0) {
-				$type = 'string';
-			} elseif ($field['Type'] == 'datetime') {
-				$type = 'string';
-				$format = 'date-time';
-			} elseif ($field['Type'] == 'date') {
-				$type = 'string';
-				$format = 'date';
-			} elseif (strpos($field['Type'], 'decimal') === 0) {
-				$type = 'number';
-				$format = 'double';
-			}
-			$properties[ $field['Field'] ] = [
-				'type' => $type
-			];
-			if (isset($format)) {
-				$properties[ $field['Field'] ]['format'] = $format;
-			}
+			$properties[ $field['Field'] ] = Media\Type::create_for_mysql_type($field['Type']);
 		}
 		return $properties;
 	}

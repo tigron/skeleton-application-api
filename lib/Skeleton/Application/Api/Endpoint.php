@@ -52,7 +52,7 @@ abstract class Endpoint {
 		}
 
 		if (!is_callable([$this, $method])) {
-			\Skeleton\Core\Web\HTTP\Status::code_404('module');
+			\Skeleton\Core\Web\HTTP\Status::code_404('endpoint');
 		}
 
 		$paths = $this->get_paths();
@@ -64,15 +64,18 @@ abstract class Endpoint {
 		}
 
 		if ($requested_path === null) {
-			\Skeleton\Core\Web\HTTP\Status::code_404('module');
+			\Skeleton\Core\Web\HTTP\Status::code_404('endpoint');
 		}
 
 
 		$reflection_method = new \ReflectionMethod($this, $method);
 		// Verify if security is ok
 		foreach ($requested_path->security as $security) {
-			if (!$secutity->handle()) {
-
+			try {
+				$security->handle();
+			} catch (Exception $e) {
+				$e->output();
+				return;
 			}
 		}
 
@@ -86,11 +89,28 @@ abstract class Endpoint {
 			}
 			$parameters[] = $_GET[$required_parameter->getName()];
 		}
-		$response = $reflection_method->invokeArgs($this, $parameters);
-		echo json_encode($response->get_component_info(), JSON_PRETTY_PRINT);
+		try {
+			$response = $reflection_method->invokeArgs($this, $parameters);
+		} catch (Exception $e) {
+			$e->output();
+			return;
+		}
 
-
-
+		if (is_object($response)) {
+			echo json_encode($response->get_component_info(), JSON_PRETTY_PRINT);
+		} elseif (is_array($response)) {
+			$output = [];
+			foreach ($response as $value) {
+				if (is_object($value)) {
+					$output[] = $value->get_component_info();
+				} else {
+					$output[] = $value;
+				}
+			}
+			echo json_encode($output, JSON_PRETTY_PRINT);
+		} else {
+			echo json_encode($response, JSON_PRETTY_PRINT);
+		}
 	}
 
 	/**

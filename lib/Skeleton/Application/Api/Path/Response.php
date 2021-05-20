@@ -30,7 +30,7 @@ class Response {
 	 * Type
 	 *
 	 * @access public
-	 * @var phpDocumentor\Reflection\Type $content
+	 * @var Media\Type $content
 	 */
 	public $content = null;
 
@@ -41,6 +41,9 @@ class Response {
 	 * @return array $schema
 	 */
 	public function get_schema() {
+		if ($this->content === null) {
+			return null;
+		}
 		$schema = [];
 		$schema['schema'] = $this->content->get_schema();
 		return $schema;

@@ -69,14 +69,17 @@ class Api extends \Skeleton\Core\Application {
 		$this->endpoint_path = $this->path . '/endpoint/';
 		$this->component_path = $this->path . '/component/';
 		$this->security_path = $this->path . '/security/';
+		$this->exception_path = $this->path . '/exception/';
 		$this->endpoint_namespace = "\\App\\" . ucfirst($this->name) . "\Endpoint\\";
 		$this->component_namespace = "\\App\\" . ucfirst($this->name) . "\Component\\";
 		$this->security_namespace = "\\App\\" . ucfirst($this->name) . "\Security\\";
+		$this->exception_namespace = "\\App\\" . ucfirst($this->name) . "\Exception\\";
 
 		$autoloader = new \Skeleton\Core\Autoloader();
 		$autoloader->add_namespace($this->endpoint_namespace, $this->endpoint_path);
 		$autoloader->add_namespace($this->component_namespace, $this->component_path);
 		$autoloader->add_namespace($this->security_namespace, $this->security_path);
+		$autoloader->add_namespace($this->exception_namespace, $this->exception_path);
 
 		$autoloader->register();
 	}
@@ -108,7 +111,6 @@ class Api extends \Skeleton\Core\Application {
 	 * @access public
 	 */
 	public function run() {
-
 		try {
 			\Skeleton\Core\Web\Media::detect($this->request_relative_uri);
 		} catch (\Skeleton\Core\Exception\Media\Not\Found $e) {
@@ -119,7 +121,9 @@ class Api extends \Skeleton\Core\Application {
 
 		if ($request['dirname'] == '/' and $request['basename'] == 'openapi.json') {
 			$generator = new \Skeleton\Application\Api\Openapi\Generator();
-			$generator->add_components($this->get_components());
+			foreach ($this->get_components() as $component) {
+				$generator->add_component($component);
+			}
 			$generator->add_endpoints($this->get_endpoints());
 			$generator->add_security($this->get_security());
 			$generator->serve('json');
@@ -138,6 +142,7 @@ class Api extends \Skeleton\Core\Application {
 		 * FIXME: this nested try/catch is not the prettiest of things
 		 */
 		$endpoint = null;
+
 		try {
 			// Attempt to find the module by matching defined routes
 			$endpoint = $this->route($this->request_relative_uri);
@@ -158,6 +163,8 @@ class Api extends \Skeleton\Core\Application {
 			\Skeleton\Core\Web\HTTP\Status::code_404('module');
 		}
 
+		// All what will be outputted after this is JSON
+		header('Content-Type: application/json');
 		$endpoint->accept_request();
 	}
 
@@ -213,9 +220,10 @@ class Api extends \Skeleton\Core\Application {
 					}
 
 					if (isset($value[0]) AND $value[0] == '$') {
-						if ($value === '$action') {
+						if (strpos($value, '$action') === 0) {
 							// Check if the given parameter defines an action
 							$method = strtolower($_SERVER['REQUEST_METHOD']) . '_' . $request_parts[$key];
+
 							if (is_callable([$module, $method])) {
 								$matches_fixed_parts++;
 								continue;
@@ -223,6 +231,7 @@ class Api extends \Skeleton\Core\Application {
 						}
 
 						preg_match_all('/(\[(.*?)\])/', $value, $matches);
+
 						if (!isset($matches[2][0])) {
 							/**
 							 *  There are no possible values for the variable
@@ -230,6 +239,19 @@ class Api extends \Skeleton\Core\Application {
 							 */
 							 continue;
 						}
+
+						$possible_values = explode(',', $matches[2][0]);
+
+						$variable_matches = false;
+						foreach ($possible_values as $possible_value) {
+							if ($request_parts[$key] == $possible_value) {
+								$variable_matches = true;
+							}
+						}
+
+						if (!$variable_matches) {
+							$match = false;
+						}						
 
 						// This is a variable, we do not increase the fixed parts
 						continue;
@@ -290,17 +312,15 @@ class Api extends \Skeleton\Core\Application {
 	 * @access public
 	 */
 	public function get_endpoints() {
-		$iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->endpoint_path));
-		$files = array_filter(iterator_to_array($iterator), function($file) {
-			return $file->isFile();
-		});
+		$files= [];
+		foreach (glob($this->endpoint_path . '/*.php') as $filename) {
+			$files[] = $filename;
+		}
+
 		$endpoints = [];
 
 		foreach ($files as $file) {
-			if ($file->getExtension() != 'php') {
-				continue;
-			}
-			$pathinfo = pathinfo($file->getPathname());
+			$pathinfo = pathinfo($file);
 			$endpoint = str_replace($this->endpoint_path, '', $pathinfo['dirname'] . DIRECTORY_SEPARATOR) . $pathinfo['filename'];
 			$endpoint = str_replace(DIRECTORY_SEPARATOR, '\\', $endpoint);
 
@@ -317,17 +337,15 @@ class Api extends \Skeleton\Core\Application {
 	 * @access public
 	 */
 	public function get_components() {
-		$iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->component_path));
-		$files = array_filter(iterator_to_array($iterator), function($file) {
-			return $file->isFile();
-		});
+		$files= [];
+		foreach (glob($this->component_path . '/*.php') as $filename) {
+			$files[] = $filename;
+		}
+
 		$components = [];
 
 		foreach ($files as $file) {
-			if ($file->getExtension() != 'php') {
-				continue;
-			}
-			$pathinfo = pathinfo($file->getFileName());
+			$pathinfo = pathinfo($file);
 			$component = $pathinfo['filename'];
 			$component = str_replace(DIRECTORY_SEPARATOR, '\\', $component);
 
@@ -347,17 +365,15 @@ class Api extends \Skeleton\Core\Application {
 		if (!file_exists($this->security_path)) {
 			return [];
 		}
-		$iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->security_path));
-		$files = array_filter(iterator_to_array($iterator), function($file) {
-			return $file->isFile();
-		});
+		$files= [];
+		foreach (glob($this->security_path . '/*.php') as $filename) {
+			$files[] = $filename;
+		}
+
 		$securities = [];
 
 		foreach ($files as $file) {
-			if ($file->getExtension() != 'php') {
-				continue;
-			}
-			$pathinfo = pathinfo($file->getFileName());
+			$pathinfo = pathinfo($file);
 			$security = $pathinfo['filename'];
 			$security = str_replace(DIRECTORY_SEPARATOR, '\\', $security);
 
