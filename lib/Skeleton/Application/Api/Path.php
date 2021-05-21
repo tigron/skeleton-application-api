@@ -289,7 +289,7 @@ class Path {
 					$parameter = new Parameter();
 					$parameter->name = $param->getVariableName();
 					$parameter->description = $param->getDescription()->getBodyTemplate();
-					$parameter->type = \Skeleton\Application\Api\Media\Type::create_for_reflection_type($param->getType());
+					$parameter->media_type = \Skeleton\Application\Api\Media\Type::create_for_reflection_type($param->getType());
 					$path->parameters[] = $parameter;
 				}
 

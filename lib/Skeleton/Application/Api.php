@@ -251,7 +251,7 @@ class Api extends \Skeleton\Core\Application {
 
 						if (!$variable_matches) {
 							$match = false;
-						}						
+						}
 
 						// This is a variable, we do not increase the fixed parts
 						continue;
