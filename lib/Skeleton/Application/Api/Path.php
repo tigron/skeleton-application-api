@@ -142,8 +142,14 @@ class Path {
 
 		/**
 		 * 2. Check for existing routes, if so rewrite the raw url
+		 * If a base_uri is set, it should not be included in every endpoint,
+		 * instead, a server variable is set.
 		 */
 		$query = \Skeleton\Core\Util::rewrite_reverse($query);
+		$application = \Skeleton\Core\Application::get();
+		if (isset($application->config->base_uri)) {
+			$query = '/' . ltrim($query, $application->config->base_uri);
+		}
 
 		/**
 		 * 3. We don't want to show $_GET parameters in specifications. Let's
