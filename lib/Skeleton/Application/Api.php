@@ -310,6 +310,39 @@ class Api extends \Skeleton\Core\Application {
 	}
 
 	/**
+	 * Call event if exists
+	 *
+	 * @access public
+	 * @param string $context
+	 * @param string $action
+	 */
+	public function call_event_if_exists($context, $action, $arguments = []) {
+		if ($context == 'error' and $action == 'exception') {
+			// If an error occures, we need to handle it differently for API
+			$exception = array_shift($arguments);
+			$exception = new \Skeleton\Application\Api\Exception($exception->getMessage(), 500);
+			$exception->output();
+			return;
+		} else {
+			return parent::call_event_if_exists($context, $action, $arguments);
+		}
+	}
+	/**
+	 * Check if an event exists
+	 *
+	 * @access public
+	 * @param string $context
+	 * @param string $action
+	 * @return bool $exists
+	 */
+	public function event_exists($context, $action) {
+		if ($context == 'error' and $action == 'exception') {
+			return true;
+		}
+		return parent::event_exists($context, $action);
+	}
+
+	/**
 	 * Get endpoints
 	 *
 	 * @access public

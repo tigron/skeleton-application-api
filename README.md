@@ -22,7 +22,7 @@ Your Openapi application should follow the following directory structure:
         - exception (optional)
         - security (optional)
 
-It is important to understand that every class that is created should be in 
+It is important to understand that every class that is created should be in
 their correct namespace. The following namespaces should be used:
 
     component: \App\{APP_NAME}\Component
@@ -53,7 +53,7 @@ Let's look at an example:
 
     <?php
     namespace App\Openapi\Endpoint;
-    
+
     /**
      * Operations on users
      */
@@ -77,10 +77,10 @@ Let's look at an example:
 This endpoint will create a tag in the specification that contains 1 path:
 
 	POST /user?action=login
-	
+
 Every method should follow this naming schema:
 
-    {HTTP_OPERATION}_{ACTION}({REQUIRED_PARAM1}, {REQUIRED_PARAM2})	
+    {HTTP_OPERATION}_{ACTION}({REQUIRED_PARAM1}, {REQUIRED_PARAM2})
 
 In the class, docblock data is used to:
   - The docblock for the class definition will be used as a description for the tag
@@ -90,7 +90,7 @@ In the class, docblock data is used to:
 ### Parameters
 
 Every parameter that can be accepted should be defined via "@param {TYPE} {NAME} {DESCRIPTION}"
-The type can be a primitive datatype (int, integer, boolean, float) or an 
+The type can be a primitive datatype (int, integer, boolean, float) or an
 array an array of primitive datatypes.
 
 A definition of an array:
@@ -99,22 +99,22 @@ A definition of an array:
 ### Return variables
 
 It is required to specify a return variable. This return variable will be used
-in a succesful HTTP 200 response. 
-The return variable can be a primitive datatypes or a Component. (See 
+in a succesful HTTP 200 response.
+The return variable can be a primitive datatypes or a Component. (See
 Components for more information).
 Arrays of primitive datatypes and arrays of components are also supported.
 
 ### Exceptions
 
 If the path can cause an exception, it should be defined in the docblock via
-the @throws docblock. The exception should be of type 
+the @throws docblock. The exception should be of type
 \Skeleton\Application\Api\Exception or an extending class. Ex
 
     @throws \Skeleton\Application\Api\Exception
 
 ### Security
 
-If authentication is required for the path, it needs to be specified via 
+If authentication is required for the path, it needs to be specified via
 docblock:
 
     @security \Skeleton\Application\Api\Security
@@ -127,8 +127,8 @@ If the path will return a header, it can be specified via:
 
 ### Routes
 
-The automatically generated url for your path is not always a clean url. An 
-array with route information can clean this url. 
+The automatically generated url for your path is not always a clean url. An
+array with route information can clean this url.
 Ex:
 
 	POST /user?action=edit&id={ID}
@@ -142,13 +142,13 @@ config:
 
 By defining this route, the url will be rewritten as:
 
-    POST /user/edit/{ID} 
+    POST /user/edit/{ID}
 
 
 ### Advanced
-    
+
 All paths in the endpoint are all grouped under the same tag. The name of the
-tag is automatically generated based on the classname of the endpoint. 
+tag is automatically generated based on the classname of the endpoint.
 If for some reason you want to modify the name, this can be done by providing
 the following method:
 
@@ -173,7 +173,7 @@ Components should implement the following 2 methods:
      *
      * @access public
      * @return array $info
-     */	
+     */
     public function get_component_info() {
     	$info = [];
     	$info['id'] = $this->id;
@@ -201,24 +201,23 @@ Components should implement the following 2 methods:
 		$media_type->type = 'string';
 		$properties['name'] = $media_type;
 
-		return $properties;    
+		return $properties;
     }
 
-Method 'get_component_properties()' should return an array of 
+Method 'get_component_properties()' should return an array of
 \Skeleton\Application\Api\Media\Type to describe each property. The key of the
 array is the name of the property.
 
-Method 'get_component_info()' is used to return the actual content whenever 
+Method 'get_component_info()' is used to return the actual content whenever
 this object needs to be returned. It is important that the structure of this
 array matches the structure of 'get_component_properties()'.
 
 ### Skeleton-object
 
-In case your component class is derived from an object which is a 
+In case your component class is derived from an object which is a
 '\Skeleton\Object\Model', you can use the already defined trait:
 
     \Skeleton\Application\Api\Component;
 
 With this trait, the output will match the complete object such as defined in
 your database.
-
