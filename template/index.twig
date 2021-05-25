@@ -31,14 +31,13 @@
 
   <body>
     <div id="swagger-ui"></div>
-
 	<script src="/skeleton-application-api/swagger-ui-bundle.js" charset="UTF-8"></script>
 	<script src="/skeleton-application-api/swagger-ui-standalone-preset.js" charset="UTF-8"></script>
     <script>
     window.onload = function() {
       // Begin Swagger UI call region
       const ui = SwaggerUIBundle({
-        url: "/openapi.json",
+        url: "{{ base_uri }}/openapi.json",
         dom_id: '#swagger-ui',
         deepLinking: true,
         presets: [

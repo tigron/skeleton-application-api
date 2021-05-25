@@ -87,6 +87,11 @@ class Generator {
 		$schema = [];
 		$schema['openapi'] = '3.0.2';
 		$schema['servers'] = [];
+		if (isset($config->base_uri)) {
+			$schema['servers'][] = [
+				'url' => $config->base_uri,
+			];
+		}
 
 		if (!isset($config->title)) {
 			throw new \Exception('Please specify "title" configuration');
