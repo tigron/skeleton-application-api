@@ -225,7 +225,7 @@ class Path {
 			 */
 			if (count($this->headers) > 0) {
 				foreach ($this->headers as $key => $header) {
-					$schema[$route][$this->operation]['responses'][$response->code]['headers'][$header]['type'] = 'string';
+					$schema[$route][$this->operation]['responses'][$response->code]['headers'][$header]['schema']['type'] = 'string';
 				}
 			}
 		}
