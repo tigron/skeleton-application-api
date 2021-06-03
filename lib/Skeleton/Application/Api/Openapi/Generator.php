@@ -154,9 +154,11 @@ class Generator {
 		 * Generate the 'components'
 		 */
 		$schema['components'] = [];
-		$schema['components']['securitySchemes'] = [];
-		foreach ($this->security as $security) {
-			$schema['components']['securitySchemes'][$security->get_name()] = $security->get_schema();
+		if (count($this->security) > 0) {
+			$schema['components']['securitySchemes'] = [];
+			foreach ($this->security as $security) {
+				$schema['components']['securitySchemes'][$security->get_name()] = $security->get_schema();
+			}
 		}
 		$schema['components']['schemas'] = [];
 		foreach ($this->components as $component) {
