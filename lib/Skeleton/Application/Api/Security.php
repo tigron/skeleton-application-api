@@ -66,7 +66,7 @@ abstract class Security {
 		foreach ($exceptions as $exception) {
 			$classname = (string)$exception->getType()->getFqsen();
 			if (!class_exists($classname)) {
-				throw new \Exception('Incorrect exception specified in docblock for method ' . $endpoint->get_name() . '/' . $method->name);
+				throw new \Exception('Incorrect exception specified in docblock for method ' . $this->get_name() . '/' . $method->name);
 			}
 			$class = new $classname();
 			$response = new Path\Response();
