@@ -18,7 +18,7 @@ class Exception extends \Exception {
 	 * @access public
 	 */
 	public function output() {
-		header($this->getMessage(), true, $this->getCode());
+		header($_SERVER["SERVER_PROTOCOL"] . ' ' . $this->getCode() . ' ' . $this->getMessage(), true);
 		echo json_encode($this->getMessage());
 		return;
 	}
