@@ -150,8 +150,18 @@ class Type {
 				$media_type->format = 'float';
 				break;
 			case 'Object_':
-				$media_type->type = 'object';
-				$media_type->value_type = (string)$type->getFqsen();
+				// We will treat some objects as primitive types
+				$classname = (string)$type->getFqsen();
+				if (strtolower($classname) == "\date") {
+					$media_type->type = 'string';
+					$media_type->format = 'date';
+				} elseif (strtolower($classname) == "\datetime") {
+					$media_type->type = 'string';
+					$media_type->format = 'date-time';
+				} else {
+					$media_type->type = 'object';
+					$media_type->value_type = (string)$type->getFqsen();
+				}
 				break;
 			case 'Array_':
 				$media_type->type = 'array';
