@@ -27,6 +27,14 @@ class Type {
 	public $format = null;
 
 	/**
+	 * Nullable
+	 *
+	 * @access public
+	 * @var boolean $nullable
+	 */
+	public $nullable = false;
+
+	/**
 	 * Valuetype
 	 * The object in the array or the classname in case of type=object
 	 *
@@ -105,6 +113,9 @@ class Type {
 			$schema['type'] = $this->type;
 			if (isset($this->format)) {
 				$schema['format'] = $this->format;
+			}
+			if (isset($this->nullable) and $this->nullable !== false) {
+				$schema['nullable'] = $this->nullable;
 			}
 		}
 
