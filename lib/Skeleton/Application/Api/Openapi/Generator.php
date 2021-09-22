@@ -163,13 +163,21 @@ class Generator {
 		$schema['components']['schemas'] = [];
 		foreach ($this->components as $component) {
 			$name = str_replace($application->component_namespace, '', '\\' . get_class($component));
+			$name = str_replace('\\', '_', $name);
 			$schema['components']['schemas'][$name] = [
 				'properties' => [],
 				'type' => 'object',
 			];
 			$properties = $component->get_component_properties();
+			$required = [];
 			foreach ($properties as $key => $property) {
+				if ($property->required) {
+					$required[] = $key;
+				}
 				$schema['components']['schemas'][$name]['properties'][$key] = $property->get_schema();
+			}
+			if (count($required) > 0) {
+				$schema['components']['schemas'][$name]['required'] = $required;
 			}
 		}
 

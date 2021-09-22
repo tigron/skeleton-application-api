@@ -9,6 +9,7 @@
 namespace Skeleton\Application\Api;
 
 use \Skeleton\Application\Api\Path\Parameter;
+use \Skeleton\Application\Api\Path\Body;
 use \Skeleton\Application\Api\Path\Response;
 
 class Path {
@@ -63,6 +64,14 @@ class Path {
 	 * @var Parameter[] $parameters
 	 */
 	public $parameters = [];
+
+	/**
+	 * Body
+	 *
+	 * @access public
+	 * @var Body $body
+	 */
+	public $body = null;	
 
 	/**
 	 * Responses
@@ -206,6 +215,15 @@ class Path {
 				$schema[$route][$this->operation]['parameters'][] = $parameter->get_schema();
 			}
 		}
+		
+		if ($this->body !== null) {
+			$schema[$route][$this->operation]['requestBody'] = [
+				'required' => true,
+				'content' => [
+					'application/json' => $this->body->get_schema(),
+				],
+			];
+		}
 
 		if (count($this->responses) == 0) {
 			throw new \Exception('No response defined for path ' . $this->name . '/' . $this->operation);
@@ -280,6 +298,7 @@ class Path {
 				try {
 					$docblock = $method->getDocComment();
 					$factory  = \phpDocumentor\Reflection\DocBlockFactory::createInstance();
+					$factory->registerTagHandler('body', '\Skeleton\Application\Api\Docblock\Tag\Handler\Body');
 					$docblock = $factory->create($docblock);
 					$path->summary = $docblock->getSummary();
 				} catch (\Webmozart\Assert\InvalidArgumentException $e) {
@@ -297,6 +316,21 @@ class Path {
 					$parameter->description = $param->getDescription()->getBodyTemplate();
 					$parameter->media_type = \Skeleton\Application\Api\Media\Type::create_for_reflection_type($param->getType());
 					$path->parameters[] = $parameter;
+				}
+
+				/**
+				 * Add body by docblock
+				 */
+				$body = $docblock->getTagsByName('body');
+				if (count($body) > 1) {
+					throw new \Exception('More than 1 return value specified in docblock for body');				
+				} elseif (count($body) == 1) {
+					$tag = array_shift($body);
+					$parameter = new Body();
+					$parameter->name = 'body';
+					$parameter->description = $tag->getDescription()->getBodyTemplate();
+					$parameter->media_type = \Skeleton\Application\Api\Media\Type::create_for_reflection_type($tag->getType());					
+					$path->body = $parameter;
 				}
 
 				/**

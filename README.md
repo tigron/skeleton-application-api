@@ -83,7 +83,7 @@ Every method should follow this naming schema:
     {HTTP_OPERATION}_{ACTION}({REQUIRED_PARAM1}, {REQUIRED_PARAM2})
 
 In the class, docblock data is used to:
-  - The docblock for the class definition will be used as a description for the tag
+  - The docblock for the class definition will be used as a description for the path
   - The docblock for the method will be used as a description for the tag
   - The docblock for the method will be used to specify the input en output parameters, the possible exceptions and the security mechanism that needs to be used
 
@@ -94,6 +94,7 @@ The type can be a primitive datatype (int, integer, boolean, float) or an
 array an array of primitive datatypes.
 
 A definition of an array:
+
     @param string[] $names
 
 ### Return variables
@@ -103,6 +104,15 @@ in a succesful HTTP 200 response.
 The return variable can be a primitive datatypes or a Component. (See
 Components for more information).
 Arrays of primitive datatypes and arrays of components are also supported.
+
+### Body
+
+If the path accepts a body, it should be declared in the docblock via
+
+    @body \App\Api\Component\Mybody $custom_body
+
+The body-class is a component and needs to implement the specific methods
+required for a component.
 
 ### Exceptions
 
@@ -221,3 +231,74 @@ In case your component class is derived from an object which is a
 
 With this trait, the output will match the complete object such as defined in
 your database.
+
+### Media types
+
+To define a component, an array of media types needs to be returned. 
+
+#### Integer
+
+	$media_type = new \Skeleton\Application\Api\Media\Type();
+	$media_type->type = 'integer';
+	$media_type->format = 'int64'; // Optional, possible values 'int32', 'int64'
+
+#### Number
+
+	$media_type = new \Skeleton\Application\Api\Media\Type();
+	$media_type->type = 'number';
+	$media_type->format = 'float'; // Optional, possible values 'float', 'double'
+	
+#### String	
+
+	$media_type = new \Skeleton\Application\Api\Media\Type();
+	$media_type->type = 'string';
+	$media_type->format = 'date'; // Optional, possible values 'date', 'date-time', 'password', 'byte', 'binary', 'uuid', ...
+
+#### Object
+
+	$media_type = new \Skeleton\Application\Api\Media\Type();
+	$media_type->type = 'object';
+	$media_type->value_type = '\App\Api\Component\ClassA';
+
+#### Array
+
+	$media_type = new \Skeleton\Application\Api\Media\Type();
+	$media_type->type = 'array';
+
+	$value_type = new \Skeleton\Application\Api\Media\Type();
+	$value_type->type = 'object';
+	$value_type->value_type = '\App\Api\Component\MyObject';
+
+	$media_type->value_type = $value_type;
+
+
+#### Mixed media types
+
+	$media_type_mixed = new \Skeleton\Application\Api\Media\Type\Mixed();
+
+	$media_type1 = new \Skeleton\Application\Api\Media\Type();
+	$media_type1->type = 'object';
+	$media_type1->value_type = '\App\Api\Component\Class1';
+	$media_type_mixed->add_media_type($media_type1);
+
+	$media_type2 = new \Skeleton\Application\Api\Media\Type();
+	$media_type2->type = 'object';
+	$media_type2->value_type = '\App\Api\Component\Class2';
+	$media_type_mixed->add_media_type($media_type2);
+
+	$media_type3 = new \Skeleton\Application\Api\Media\Type();
+	$media_type3->type = 'object';
+	$media_type3->value_type = '\App\Api\Component\Class3';
+	$media_type_mixed->add_media_type($media_type3);	
+	$media_type_mixed->criteria = 'anyOf'; // Possible values 'oneOf', 'allOf', 'anyOf'
+
+#### Extra properties
+
+Media types can have the following other properties:
+
+	description: a description of the media type
+	required: boolean, indicates if the media type is required
+	nullable: boolean, can the value be null
+	
+	
+

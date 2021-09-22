@@ -11,6 +11,7 @@
     ],
     "require": {
         "tigron/skeleton-core": ">=2",
+        "tigron/skeleton-template-twig": ">=2",
         "phpdocumentor/reflection-docblock": "~5.2"
     },
     "suggest": {

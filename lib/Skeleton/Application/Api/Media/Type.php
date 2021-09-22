@@ -44,6 +44,23 @@ class Type {
 	public $value_type = null;
 
 	/**
+	 * Description
+	 * An optional description for the media_type
+	 *
+	 * @access public
+	 * @var string $description
+	 */
+	public $description = null;
+
+	/**
+	 * Required
+	 *
+	 * @access public
+	 * @var bool $required
+	 */
+	public $required = false;
+
+	/**
 	 * Validate
 	 *
 	 * @access public
@@ -55,12 +72,19 @@ class Type {
 			// The value_type must be a valid classname
 			if ($this->type == 'object') {
 				if (!class_exists($this->value_type)) {
-					throw new \Exception('Media type validation error: Media type with type ' . $this->type . ' references value type ' . $this->value_type . ' but it does not exist');
+					throw new \Exception('' .
+						'Media type validation error: Media type with type ' .
+						$this->type . ' references value type ' .
+						$this->value_type . ' but it does not exist'
+					);
 				}
 			}
 
 			if (isset($this->format)) {
-				throw new \Exception('Media type validation error: Media type with type ' . $this->type . ' has defined a format, which is not allowed');
+				throw new \Exception('' .
+					'Media type validation error: Media type with type ' .
+					$this->type . ' has defined a format, which is not allowed'
+				);
 			}
 
 			return;
@@ -68,26 +92,63 @@ class Type {
 
 		// Primitive data types
 		$primitives = [ 'integer', 'number', 'string', 'boolean' ];
+
 		if (in_array($this->type, $primitives)) {
 			if (isset($this->value_type)) {
-				throw new \Exception('Media type validation error: Media type with type ' . $this->type . ' has value_type set to "' . $this->value_type . '" which is not allowed');
+				throw new \Exception('' .
+					'Media type validation error: Media type with type ' .
+					$this->type . ' has value_type set to "' .
+					$this->value_type . '" which is not allowed'
+				);
 			}
 
 			if ($this->type == 'integer') {
-				if (isset($this->format) and !in_array($this->format, ['int32', 'int64'])) {
-					throw new \Exception('Media type validation error: Media type with type ' . $this->type . ' cannot have format "' . $this->format . '"');
+				$integer_formats = [
+					'int32',
+					'int64'
+				];
+
+				if (isset($this->format) and !in_array($this->format, $integer_formats)) {
+					throw new \Exception(''.
+						'Media type validation error: Media type with type ' .
+						$this->type . ' cannot have format "' .
+						$this->format . '"'
+					);
 				}
 			}
 
 			if ($this->type == 'number') {
-				if (isset($this->format) and !in_array($this->format, ['float', 'double'])) {
-					throw new \Exception('Media type validation error: Media type with type ' . $this->type . ' cannot have format "' . $this->format . '"');
+				$number_formats = [
+					'float',
+					'double'
+				];
+
+				if (isset($this->format) and !in_array($this->format, $number_formats)) {
+					throw new \Exception(
+						'Media type validation error: Media type with type ' .
+						$this->type . ' cannot have format "' .
+						$this->format . '"'
+					);
 				}
 			}
 
 			if ($this->type == 'string') {
-				if (isset($this->format) and !in_array($this->format, ['byte', 'binary', 'date', 'date-time', 'password', 'email', 'uuid' ])) {
-					throw new \Exception('Media type validation error: Media type with type ' . $this->type . ' cannot have format "' . $this->format . '"');
+				$string_formats = [
+					'byte',
+					'binary',
+					'date',
+					'date-time',
+					'password',
+					'email',
+					'uuid'
+				];
+
+				if (isset($this->format) and !in_array($this->format, $string_formats)) {
+					throw new \Exception(
+						'Media type validation error: Media type with type ' .
+						$this->type . ' cannot have format "' .
+						$this->format . '"'
+					);
 				}
 			}
 
@@ -96,7 +157,6 @@ class Type {
 
 		throw new \Exception('Media type validation error: incorrect type "' . $this->type . '"');
 	}
-
 
 	/**
 	 * Get schema
@@ -121,6 +181,7 @@ class Type {
 
 		if ($this->type == 'object') {
 			$component = str_replace($application->component_namespace, '', $this->value_type);
+			$component = str_replace('\\', '_', $component);
 			$schema['$ref'] = '#/components/schemas/' . $component;
 		}
 
@@ -128,6 +189,11 @@ class Type {
 			$schema['type'] = 'array';
 			$schema['items'] = $this->value_type->get_schema();
 		}
+
+		if ($this->type != 'object' and $this->description !== null) {
+			$schema['description'] = $this->description;
+		}
+
 		return $schema;
 	}
 
