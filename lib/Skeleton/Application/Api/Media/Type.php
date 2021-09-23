@@ -61,6 +61,22 @@ class Type {
 	public $required = false;
 
 	/**
+	 * Additional Properties
+	 *
+	 * @access public
+	 * @var $mixed $additional_properties
+	 */
+	public $additional_properties = true;
+
+	/**
+	 * Properties
+	 *
+	 * @access public
+	 * @var array $propertiess
+	 */
+	public $properties = [];
+
+	/**
 	 * Validate
 	 *
 	 * @access public
@@ -164,38 +180,138 @@ class Type {
 	 * @access public
 	 * @return array $schema
 	 */
-	public function get_schema() {
+	public function get_schema($object_reference = true) {
 		$this->validate();
 		$application = \Skeleton\Core\Application::get();
+		
+		if (is_callable([$this, 'get_schema_' . $this->type])) {
+			return call_user_func_array([$this, 'get_schema_' . $this->type], [ $object_reference ]);
+		}
 
+		throw new \Exception('Cannot create schema for type ' . $this->type);
+	}
+
+	/**
+	 * Get schema for type=object
+	 *
+	 * @access private
+	 * @param boolean $object_reference
+	 */
+	private function get_schema_object($object_reference = true) {
 		$schema = [];
-		if ($this->type != 'object' and $this->type != 'array') {
-			$schema['type'] = $this->type;
-			if (isset($this->format)) {
-				$schema['format'] = $this->format;
-			}
-			if (isset($this->nullable) and $this->nullable !== false) {
-				$schema['nullable'] = $this->nullable;
-			}
+
+		if ($object_reference) {
+			$classname = new $this->value_type();
+			$name = $classname->get_openapi_component_name();
+			$schema['$ref'] = '#/components/schemas/' . $name;
+			return $schema;
 		}
 
-		if ($this->type == 'object') {
-			$component = str_replace($application->component_namespace, '', $this->value_type);
-			$component = str_replace('\\', '_', $component);
-			$schema['$ref'] = '#/components/schemas/' . $component;
+		$schema['type'] = 'object';
+		$schema['properties'] = [];
+		foreach ($this->properties as $key => $property) {
+			$schema['properties'][$key] = $property->get_schema(true);
 		}
-
-		if ($this->type == 'array') {
-			$schema['type'] = 'array';
-			$schema['items'] = $this->value_type->get_schema();
-		}
-
-		if ($this->type != 'object' and $this->description !== null) {
-			$schema['description'] = $this->description;
-		}
-
+		
 		return $schema;
 	}
+
+	/**
+	 * Get schema for type=array
+	 *
+	 * @access private
+	 * @param boolean $object_reference
+	 */
+	private function get_schema_array($object_reference = true) {
+		$schema = [];
+		$schema['type'] = 'array';
+		if ($this->description !== null) {
+			$schema['description'] = $this->description;
+		}
+		$schema['items'] = $this->value_type->get_schema();
+		return $schema;
+	}
+
+	/**
+	 * Get schema for type=boolean
+	 *
+	 * @access private
+	 * @param boolean $object_reference
+	 */
+	private function get_schema_boolean($object_reference = true) {
+		$schema = [];
+		$schema['type'] = 'boolean';
+		if ($this->description !== null) {
+			$schema['description'] = $this->description;
+		}
+		if (isset($this->nullable) and $this->nullable !== false) {
+			$schema['nullable'] = $this->nullable;
+		}		
+		return $schema;
+	}
+
+	/**
+	 * Get schema for type=number
+	 *
+	 * @access private
+	 * @param boolean $object_reference
+	 */
+	private function get_schema_number($object_reference = true) {
+		$schema = [];
+		$schema['type'] = 'number';
+		if ($this->description !== null) {
+			$schema['description'] = $this->description;
+		}
+		if (isset($this->format)) {
+			$schema['format'] = $this->format;
+		}		
+		if (isset($this->nullable) and $this->nullable !== false) {
+			$schema['nullable'] = $this->nullable;
+		}		
+		return $schema;
+	}
+
+	/**
+	 * Get schema for type=integer
+	 *
+	 * @access private
+	 * @param boolean $object_reference
+	 */	
+	private function get_schema_integer($object_reference = true) {
+		$schema = [];
+		$schema['type'] = 'integer';
+		if ($this->description !== null) {
+			$schema['description'] = $this->description;
+		}
+		if (isset($this->format)) {
+			$schema['format'] = $this->format;
+		}		
+		if (isset($this->nullable) and $this->nullable !== false) {
+			$schema['nullable'] = $this->nullable;
+		}		
+		return $schema;
+	}
+
+	/**
+	 * Get schema for type=string
+	 *
+	 * @access private
+	 * @param boolean $object_reference
+	 */	
+	private function get_schema_string($object_reference = true) {
+		$schema = [];
+		$schema['type'] = 'string';
+		if ($this->description !== null) {
+			$schema['description'] = $this->description;
+		}
+		if (isset($this->format)) {
+			$schema['format'] = $this->format;
+		}
+		if (isset($this->nullable) and $this->nullable !== false) {
+			$schema['nullable'] = $this->nullable;
+		}		
+		return $schema;
+	}	
 
 	/**
 	 * create for reflection_type

@@ -17,7 +17,7 @@ class Mixed extends \Skeleton\Application\Api\Media\Type {
 	 * @access public
 	 * @var string $value_type
 	 */
-	public $media_types = array();
+	public $media_types = [];
 
 	/**
 	 * Criteria
@@ -52,7 +52,7 @@ class Mixed extends \Skeleton\Application\Api\Media\Type {
 	 * @access public
 	 * @return array $schema
 	 */
-	public function get_schema() {
+	public function get_schema($object_reference = true) {
 		$schema = [];
 		$schema[$this->criteria] = [];
 		foreach ($this->media_types as $media_type) {

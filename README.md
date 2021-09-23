@@ -176,51 +176,50 @@ the following method:
 
 Components are the equivalent of openapi schema's. They define objects that can
 be reused in endpoints.
-Components should implement the following 2 methods:
+Components should implement the following interface:
 
-    /**
-     * Get component_info
-     *
-     * @access public
-     * @return array $info
-     */
-    public function get_component_info() {
-    	$info = [];
-    	$info['id'] = $this->id;
-    	$info['name'] = $this->name;
-        return $info;
-    }
+    \Skeleton\Application\Api\ComponentInterface
 
-    /**
-     * Get properties
-     *
-     * @access public
-     * @return array $properties
-     */
-    public function get_component_properties() {
-    	$properties = [];
+For a skeleton-object this can be achieved by simply using the trait
 
-		// id
-		$media_type = new \Skeleton\Application\Api\Media\Type();
-		$media_type->type = 'string';
-		$media_type->format = 'uuid';
-		$properties['id'] = $media_type;
+    \Skeleton\Application\Api\Component
 
-		// name
-		$media_type = new \Skeleton\Application\Api\Media\Type();
-		$media_type->type = 'string';
-		$properties['name'] = $media_type;
+The trait will implement the following methods that can be overridden:
 
-		return $properties;
-    }
+	public function get_openapi_media_type(): \Skeleton\Application\Api\Media\Type;
 
-Method 'get_component_properties()' should return an array of
-\Skeleton\Application\Api\Media\Type to describe each property. The key of the
-array is the name of the property.
+Returns the full Media\Type object for the object. By default it returns 
+a media type with type 'object' and all properties returned by 
+get_openapi_component_properties
+	
+	public function get_openapi_component_name(): string;
 
-Method 'get_component_info()' is used to return the actual content whenever
-this object needs to be returned. It is important that the structure of this
-array matches the structure of 'get_component_properties()'.
+Returns a friendly name for the component. By default the name is extracted
+from the component classname. The namespace from the app is ignored.
+	
+	public function get_openapi_component_properties(): array;
+
+Returns an array with Media\Type objects. The key of each element in the array
+becomes the name of the property.
+	
+	public function get_openapi_additional_properties();
+
+If the component has optional properties, they can be returned in this method.
+The array should have the same structure as the one returned by 
+get_openapi_component_properties: an array of Media\Type objects.
+
+	public function get_openapi_description(): string;
+
+A description for the component.
+	
+	public function get_openapi_example(): array;
+
+An example for the component.
+
+	public function get_openapi_component_info(): array;
+
+This method returns the actual object in its correct syntax described in
+get_openapi_component_properties
 
 ### Skeleton-object
 
@@ -234,7 +233,7 @@ your database.
 
 ### Media types
 
-To define a component, an array of media types needs to be returned. 
+To define a component, an array of media types needs to be returned.
 
 #### Integer
 
@@ -247,8 +246,8 @@ To define a component, an array of media types needs to be returned.
 	$media_type = new \Skeleton\Application\Api\Media\Type();
 	$media_type->type = 'number';
 	$media_type->format = 'float'; // Optional, possible values 'float', 'double'
-	
-#### String	
+
+#### String
 
 	$media_type = new \Skeleton\Application\Api\Media\Type();
 	$media_type->type = 'string';
@@ -289,7 +288,7 @@ To define a component, an array of media types needs to be returned.
 	$media_type3 = new \Skeleton\Application\Api\Media\Type();
 	$media_type3->type = 'object';
 	$media_type3->value_type = '\App\Api\Component\Class3';
-	$media_type_mixed->add_media_type($media_type3);	
+	$media_type_mixed->add_media_type($media_type3);
 	$media_type_mixed->criteria = 'anyOf'; // Possible values 'oneOf', 'allOf', 'anyOf'
 
 #### Extra properties
@@ -299,6 +298,4 @@ Media types can have the following other properties:
 	description: a description of the media type
 	required: boolean, indicates if the media type is required
 	nullable: boolean, can the value be null
-	
-	
 

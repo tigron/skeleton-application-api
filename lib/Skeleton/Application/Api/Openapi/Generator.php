@@ -41,10 +41,10 @@ class Generator {
 	 * @param \Skeleton\Application\Api\Component[] $components
 	 */
 	public function add_component($component) {
-		if (!is_callable( [$component, 'get_component_properties'])) {
-			throw new \Exception('Component with class "' . get_class($component) . '" has no method "get_component_properties"');
+		if (!($component instanceof \Skeleton\Application\Api\ComponentInterface)) {
+			throw new \Exception('Component with class "' . get_class($component) . '" does not implements the Component interface');
 		}
-		$properties = $component->get_component_properties();
+		$properties = $component->get_openapi_component_properties();
 		foreach ($properties as $key => $property) {
 			if (!is_a($property, 'Skeleton\Application\Api\Media\Type')) {
 				throw new \Exception('Property "' . $key . '" defined in component "' . get_class($component) . '" is not a media_type');
@@ -162,23 +162,10 @@ class Generator {
 		}
 		$schema['components']['schemas'] = [];
 		foreach ($this->components as $component) {
-			$name = str_replace($application->component_namespace, '', '\\' . get_class($component));
-			$name = str_replace('\\', '_', $name);
-			$schema['components']['schemas'][$name] = [
-				'properties' => [],
-				'type' => 'object',
-			];
-			$properties = $component->get_component_properties();
-			$required = [];
-			foreach ($properties as $key => $property) {
-				if ($property->required) {
-					$required[] = $key;
-				}
-				$schema['components']['schemas'][$name]['properties'][$key] = $property->get_schema();
-			}
-			if (count($required) > 0) {
-				$schema['components']['schemas'][$name]['required'] = $required;
-			}
+			$name = $component->get_openapi_component_name();
+			$media_type = $component->get_openapi_media_type();
+
+			$schema['components']['schemas'][$name] = $media_type->get_schema(false);
 		}
 
 		/**
