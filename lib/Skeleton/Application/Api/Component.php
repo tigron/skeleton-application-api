@@ -23,8 +23,10 @@ trait Component {
 		foreach ($this->get_openapi_component_properties() as $key => $property) {
 			$media_type->properties[$key] = $property;
 		}
+		$media_type->additional_properties = $this->get_openapi_additional_properties();
+
 		return $media_type;
-		
+
 	}
 
 	/**
@@ -67,7 +69,7 @@ trait Component {
 	 * @return array $additional_properties
 	 */
 	public function get_openapi_additional_properties() {
-		return [];
+		return false;
 	}
 
 	/**

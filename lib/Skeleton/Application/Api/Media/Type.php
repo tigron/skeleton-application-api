@@ -212,6 +212,13 @@ class Type {
 		foreach ($this->properties as $key => $property) {
 			$schema['properties'][$key] = $property->get_schema(true);
 		}
+		if (count($schema['properties']) == 0) {
+			unset($schema['properties']);
+		}
+
+		if ($this->additional_properties instanceof \Skeleton\Application\Api\Media\Type) {
+			$schema['additionalProperties'] = $this->additional_properties->get_schema();
+		}
 		
 		return $schema;
 	}
