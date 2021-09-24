@@ -128,20 +128,6 @@ abstract class Endpoint {
 			echo json_encode($output, JSON_PRETTY_PRINT);
 		} else {
 			echo json_encode($response, JSON_PRETTY_PRINT);
-<<<<<<< HEAD
-=======
-		$response = $reflection_method->invokeArgs($this, $parameters);
-		if (is_array($response)) {
-			$results = [];
-			foreach ($response as $key => $object) {
-				$results[$key] = $object->get_component_info();
-			}
-			echo json_encode($results, JSON_PRETTY_PRINT);
-		} else {
-			echo json_encode($response->get_component_info(), JSON_PRETTY_PRINT);
->>>>>>> f4f1457 (Fix return to json on Array + require skeleton-core v2+)
-=======
->>>>>>> 6f005b9 (bugfix: merge conflict)
 		}
 	}
 
