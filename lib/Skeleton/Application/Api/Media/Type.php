@@ -53,6 +53,15 @@ class Type {
 	public $description = null;
 
 	/**
+	 * Example
+	 * An optional example for the media_type
+	 *
+	 * @access public
+	 * @var mixed $example
+	 */
+	public $example = null;
+
+	/**
 	 * Required
 	 *
 	 * @access public
@@ -183,7 +192,7 @@ class Type {
 	public function get_schema($object_reference = true) {
 		$this->validate();
 		$application = \Skeleton\Core\Application::get();
-		
+
 		if (is_callable([$this, 'get_schema_' . $this->type])) {
 			return call_user_func_array([$this, 'get_schema_' . $this->type], [ $object_reference ]);
 		}
@@ -212,6 +221,7 @@ class Type {
 		foreach ($this->properties as $key => $property) {
 			$schema['properties'][$key] = $property->get_schema(true);
 		}
+
 		if (count($schema['properties']) == 0) {
 			unset($schema['properties']);
 		}
@@ -219,7 +229,7 @@ class Type {
 		if ($this->additional_properties instanceof \Skeleton\Application\Api\Media\Type) {
 			$schema['additionalProperties'] = $this->additional_properties->get_schema();
 		}
-		
+
 		return $schema;
 	}
 
@@ -253,7 +263,7 @@ class Type {
 		}
 		if (isset($this->nullable) and $this->nullable !== false) {
 			$schema['nullable'] = $this->nullable;
-		}		
+		}
 		return $schema;
 	}
 
@@ -269,12 +279,15 @@ class Type {
 		if ($this->description !== null) {
 			$schema['description'] = $this->description;
 		}
+		if ($this->example !== null) {
+			$schema['example'] = $this->example;
+		}
 		if (isset($this->format)) {
 			$schema['format'] = $this->format;
-		}		
+		}
 		if (isset($this->nullable) and $this->nullable !== false) {
 			$schema['nullable'] = $this->nullable;
-		}		
+		}
 		return $schema;
 	}
 
@@ -283,19 +296,22 @@ class Type {
 	 *
 	 * @access private
 	 * @param boolean $object_reference
-	 */	
+	 */
 	private function get_schema_integer($object_reference = true) {
 		$schema = [];
 		$schema['type'] = 'integer';
 		if ($this->description !== null) {
 			$schema['description'] = $this->description;
 		}
+		if ($this->example !== null) {
+			$schema['example'] = $this->example;
+		}
 		if (isset($this->format)) {
 			$schema['format'] = $this->format;
-		}		
+		}
 		if (isset($this->nullable) and $this->nullable !== false) {
 			$schema['nullable'] = $this->nullable;
-		}		
+		}
 		return $schema;
 	}
 
@@ -304,21 +320,24 @@ class Type {
 	 *
 	 * @access private
 	 * @param boolean $object_reference
-	 */	
+	 */
 	private function get_schema_string($object_reference = true) {
 		$schema = [];
 		$schema['type'] = 'string';
 		if ($this->description !== null) {
 			$schema['description'] = $this->description;
 		}
+		if ($this->example !== null) {
+			$schema['example'] = $this->example;
+		}
 		if (isset($this->format)) {
 			$schema['format'] = $this->format;
 		}
 		if (isset($this->nullable) and $this->nullable !== false) {
 			$schema['nullable'] = $this->nullable;
-		}		
+		}
 		return $schema;
-	}	
+	}
 
 	/**
 	 * create for reflection_type
