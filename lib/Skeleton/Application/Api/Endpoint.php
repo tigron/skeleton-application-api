@@ -115,12 +115,12 @@ abstract class Endpoint {
 		}
 
 		if (is_object($response)) {
-			echo json_encode($response->get_component_info(), JSON_PRETTY_PRINT);
+			echo json_encode($response->get_openapi_component_info(), JSON_PRETTY_PRINT);			
 		} elseif (is_array($response)) {
 			$output = [];
 			foreach ($response as $value) {
 				if (is_object($value)) {
-					$output[] = $value->get_component_info();
+					$output[] = $value->get_openapi_component_info();
 				} else {
 					$output[] = $value;
 				}
