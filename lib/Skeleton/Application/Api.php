@@ -134,6 +134,9 @@ class Api extends \Skeleton\Core\Application {
 			$template = \Skeleton\Core\Web\Template::get();
 			if (isset($this->config->base_uri)) {
 				$template->assign('base_uri', $this->config->base_uri);
+				if (isset($this->config->title)) {
+					$template->assign('title', $this->config->title);
+				}
 			}
 			$template->display('@skeleton-application-api/index.twig');
 			return;
