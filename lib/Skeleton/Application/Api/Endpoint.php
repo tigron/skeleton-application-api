@@ -62,6 +62,9 @@ abstract class Endpoint {
 	 * @access public
 	 */
 	public function accept_request() {
+		// Bootstrap the application
+		$application = \Skeleton\Core\Application::get();
+		$application->call_event_if_exists('application', 'bootstrap', [$this]);
 
 		// Find the method name to call
 		$method = strtolower($_SERVER['REQUEST_METHOD']);
@@ -115,7 +118,7 @@ abstract class Endpoint {
 		}
 
 		if (is_object($response)) {
-			echo json_encode($response->get_openapi_component_info(), JSON_PRETTY_PRINT);			
+			echo json_encode($response->get_openapi_component_info(), JSON_PRETTY_PRINT);
 		} elseif (is_array($response)) {
 			$output = [];
 			foreach ($response as $value) {
