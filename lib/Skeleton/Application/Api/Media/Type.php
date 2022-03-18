@@ -11,37 +11,12 @@ namespace Skeleton\Application\Api\Media;
 class Type {
 
 	/**
-	 * The data type
+	 * Additional Properties
 	 *
 	 * @access public
-	 * @var string $type
+	 * @var $mixed $additional_properties
 	 */
-	public $type = '';
-
-	/**
-	 * Format
-	 *
-	 * @access public
-	 * @var string $format
-	 */
-	public $format = null;
-
-	/**
-	 * Nullable
-	 *
-	 * @access public
-	 * @var boolean $nullable
-	 */
-	public $nullable = false;
-
-	/**
-	 * Valuetype
-	 * The object in the array or the classname in case of type=object
-	 *
-	 * @access public
-	 * @var string $value_type
-	 */
-	public $value_type = null;
+	public $additional_properties = true;
 
 	/**
 	 * Description
@@ -62,20 +37,20 @@ class Type {
 	public $example = null;
 
 	/**
-	 * Required
+	 * Format
 	 *
 	 * @access public
-	 * @var bool $required
+	 * @var string $format
 	 */
-	public $required = false;
+	public $format = null;
 
 	/**
-	 * Additional Properties
+	 * Nullable
 	 *
 	 * @access public
-	 * @var $mixed $additional_properties
+	 * @var boolean $nullable
 	 */
-	public $additional_properties = true;
+	public $nullable = false;
 
 	/**
 	 * Properties
@@ -84,6 +59,47 @@ class Type {
 	 * @var array $propertiess
 	 */
 	public $properties = [];
+
+	/**
+	 * Readonly
+	 *
+	 * @access public
+	 * @var bool $readonly
+	 */
+	public $readonly = null;
+
+	/**
+	 * Writeonly
+	 *
+	 * @access public
+	 * @var bool $writeonly
+	 */
+	public $writeonly = null;		
+
+	/**
+	 * Required
+	 *
+	 * @access public
+	 * @var bool $required
+	 */
+	public $required = false;
+
+	/**
+	 * The data type
+	 *
+	 * @access public
+	 * @var string $type
+	 */
+	public $type = '';
+
+	/**
+	 * Valuetype
+	 * The object in the array or the classname in case of type=object
+	 *
+	 * @access public
+	 * @var string $value_type
+	 */
+	public $value_type = null;
 
 	/**
 	 * Validate
@@ -264,6 +280,12 @@ class Type {
 		if (isset($this->nullable) and $this->nullable !== false) {
 			$schema['nullable'] = $this->nullable;
 		}
+		if (isset($this->readonly) and $this->readonly !== false) {
+			$schema['readOnly'] = $this->readonly;
+		}
+		if (isset($this->writeonly) and $this->writeonly !== false) {
+			$schema['writeOnly'] = $this->writeonly;
+		}
 		return $schema;
 	}
 
@@ -287,6 +309,12 @@ class Type {
 		}
 		if (isset($this->nullable) and $this->nullable !== false) {
 			$schema['nullable'] = $this->nullable;
+		}
+		if (isset($this->readonly) and $this->readonly !== false) {
+			$schema['readOnly'] = $this->readonly;
+		}
+		if (isset($this->writeonly) and $this->writeonly !== false) {
+			$schema['writeOnly'] = $this->writeonly;
 		}
 		return $schema;
 	}
@@ -312,6 +340,12 @@ class Type {
 		if (isset($this->nullable) and $this->nullable !== false) {
 			$schema['nullable'] = $this->nullable;
 		}
+		if (isset($this->readonly) and $this->readonly !== false) {
+			$schema['readOnly'] = $this->readonly;
+		}
+		if (isset($this->writeonly) and $this->writeonly !== false) {
+			$schema['writeOnly'] = $this->writeonly;
+		}
 		return $schema;
 	}
 
@@ -335,6 +369,12 @@ class Type {
 		}
 		if (isset($this->nullable) and $this->nullable !== false) {
 			$schema['nullable'] = $this->nullable;
+		}
+		if (isset($this->readonly) and $this->readonly !== false) {
+			$schema['readOnly'] = $this->readonly;
+		}
+		if (isset($this->writeonly) and $this->writeonly !== false) {
+			$schema['writeOnly'] = $this->writeonly;
 		}
 		return $schema;
 	}

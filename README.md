@@ -188,30 +188,30 @@ The trait will implement the following methods that can be overridden:
 
 	public function get_openapi_media_type(): \Skeleton\Application\Api\Media\Type;
 
-Returns the full Media\Type object for the object. By default it returns 
-a media type with type 'object' and all properties returned by 
+Returns the full Media\Type object for the object. By default it returns
+a media type with type 'object' and all properties returned by
 get_openapi_component_properties
-	
+
 	public function get_openapi_component_name(): string;
 
 Returns a friendly name for the component. By default the name is extracted
 from the component classname. The namespace from the app is ignored.
-	
+
 	public function get_openapi_component_properties(): array;
 
 Returns an array with Media\Type objects. The key of each element in the array
 becomes the name of the property.
-	
+
 	public function get_openapi_additional_properties();
 
 If the component has optional properties, they can be returned in this method.
-The array should have the same structure as the one returned by 
+The array should have the same structure as the one returned by
 get_openapi_component_properties: an array of Media\Type objects.
 
 	public function get_openapi_description(): string;
 
 A description for the component.
-	
+
 	public function get_openapi_example(): array;
 
 An example for the component.
@@ -298,4 +298,5 @@ Media types can have the following other properties:
 	description: a description of the media type
 	required: boolean, indicates if the media type is required
 	nullable: boolean, can the value be null
-
+	readonly: only used in GET
+	writeonly: only used in POST/PUT
