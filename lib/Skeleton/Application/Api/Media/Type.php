@@ -74,7 +74,7 @@ class Type {
 	 * @access public
 	 * @var bool $writeonly
 	 */
-	public $writeonly = null;		
+	public $writeonly = null;
 
 	/**
 	 * Required
@@ -260,6 +260,12 @@ class Type {
 		$schema['type'] = 'array';
 		if ($this->description !== null) {
 			$schema['description'] = $this->description;
+		}
+		if (isset($this->readonly) and $this->readonly !== false) {
+			$schema['readOnly'] = $this->readonly;
+		}
+		if (isset($this->writeonly) and $this->writeonly !== false) {
+			$schema['writeOnly'] = $this->writeonly;
 		}
 		$schema['items'] = $this->value_type->get_schema();
 		return $schema;
