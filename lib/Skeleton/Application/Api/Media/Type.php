@@ -462,7 +462,7 @@ class Type {
 			return $media_type;
 		}
 
-		if (strpos($mysql_type, 'varchar') === 0) {
+		if (strpos($mysql_type, 'varchar') === 0 || $mysql_type === 'text') {
 			$media_type->type = 'string';
 			return $media_type;
 		}
