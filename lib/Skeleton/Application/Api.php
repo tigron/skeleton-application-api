@@ -127,7 +127,16 @@ class Api extends \Skeleton\Core\Application {
 			$generator->add_endpoints($this->get_endpoints());
 			$generator->add_security($this->get_security());
 			$generator->serve('json');
+		}
 
+		if ($request['dirname'] == '/' and $request['basename'] == 'openapi.yaml') {
+			$generator = new \Skeleton\Application\Api\Openapi\Generator();
+			foreach ($this->get_components() as $component) {
+				$generator->add_component($component);
+			}
+			$generator->add_endpoints($this->get_endpoints());
+			$generator->add_security($this->get_security());
+			$generator->serve('yaml');
 		}
 
 		if ($request['dirname'] == '/' and $request['filename'] == '') {

@@ -182,10 +182,19 @@ class Generator {
 	 */
 	public function serve($format = 'json') {
 		$schema = $this->build();
-		header('Content-Type: application/json');
-		echo json_encode($schema, JSON_PRETTY_PRINT);
-		exit;
-	}
 
+		if ($format == 'json') {
+			header('Content-Type: application/json');
+			echo json_encode($schema, JSON_PRETTY_PRINT);
+			exit;
+		}
+
+		if ($format == 'yaml') {
+			header('Content-Type: application/x-yaml');
+			$yaml = \yaml_emit($schema);
+			echo $yaml;
+			exit;
+		}
+	}
 
 }
