@@ -71,7 +71,7 @@ class Path {
 	 * @access public
 	 * @var Body $body
 	 */
-	public $body = null;	
+	public $body = null;
 
 	/**
 	 * Responses
@@ -104,6 +104,14 @@ class Path {
 	 * @var \Skeleton\Application\Api\Endpoint $endpoint
 	 */
 	public $endpoint;
+
+	/**
+	 * Deprecated
+	 *
+	 * @access public
+	 * @var boolean $deprecated
+	 */
+	public $deprecated = false;
 
 	/**
 	 * Get parameter by name
@@ -208,6 +216,7 @@ class Path {
 		$schema[$route][$this->operation] = [];
 		$schema[$route][$this->operation]['tags'] = [ $this->endpoint->_get_name() ];
 		$schema[$route][$this->operation]['summary'] = $this->summary;
+		$schema[$route][$this->operation]['deprecated'] = $this->deprecated;
 
 		if (count($this->parameters) > 0) {
 			$schema[$route][$this->operation]['parameters'] = [];
@@ -215,7 +224,7 @@ class Path {
 				$schema[$route][$this->operation]['parameters'][] = $parameter->get_schema();
 			}
 		}
-		
+
 		if ($this->body !== null) {
 			$schema[$route][$this->operation]['requestBody'] = [
 				'required' => true,
@@ -307,6 +316,14 @@ class Path {
 				}
 
 				/**
+				 * Check if deprecated
+				 */
+				$deprecated = $docblock->getTagsByName('deprecated');
+				if (count($deprecated) > 0) {
+					$path->deprecated = true;
+				}
+
+				/**
 				 * Add parameters by docblock
 				 */
 				$params = $docblock->getTagsByName('param');
@@ -323,13 +340,13 @@ class Path {
 				 */
 				$body = $docblock->getTagsByName('body');
 				if (count($body) > 1) {
-					throw new \Exception('More than 1 return value specified in docblock for body');				
+					throw new \Exception('More than 1 return value specified in docblock for body');
 				} elseif (count($body) == 1) {
 					$tag = array_shift($body);
 					$parameter = new Body();
 					$parameter->name = 'body';
 					$parameter->description = $tag->getDescription()->getBodyTemplate();
-					$parameter->media_type = \Skeleton\Application\Api\Media\Type::create_for_reflection_type($tag->getType());					
+					$parameter->media_type = \Skeleton\Application\Api\Media\Type::create_for_reflection_type($tag->getType());
 					$path->body = $parameter;
 				}
 

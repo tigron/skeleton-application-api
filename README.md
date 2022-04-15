@@ -135,6 +135,12 @@ If the path will return a header, it can be specified via:
 
     @header X-My-Custom-Header
 
+### Deprecated
+
+If the path is deprecated, it can be specified via:
+
+	@deprecated
+
 ### Routes
 
 The automatically generated url for your path is not always a clean url. An
