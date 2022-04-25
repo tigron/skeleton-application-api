@@ -77,6 +77,14 @@ class Type {
 	public $writeonly = null;
 
 	/**
+	 * Enum
+	 *
+	 * @access public
+	 * @var array $enum
+	 */
+	public $enum = null;
+
+	/**
 	 * Required
 	 *
 	 * @access public
@@ -381,6 +389,9 @@ class Type {
 		}
 		if (isset($this->writeonly) and $this->writeonly !== false) {
 			$schema['writeOnly'] = $this->writeonly;
+		}
+		if (isset($this->enum) and is_array($this->enum)) {
+			$schema['enum'] = $this->enum;
 		}
 		return $schema;
 	}

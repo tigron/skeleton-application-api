@@ -259,6 +259,9 @@ To define a component, an array of media types needs to be returned.
 	$media_type->type = 'string';
 	$media_type->format = 'date'; // Optional, possible values 'date', 'date-time', 'password', 'byte', 'binary', 'uuid', ...
 
+	// Enums: To define an enum, add the 'enum' property
+	$media_type->enum = [ 'state1', 'state2' ];
+
 #### Object
 
 	$media_type = new \Skeleton\Application\Api\Media\Type();
