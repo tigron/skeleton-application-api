@@ -57,20 +57,20 @@ class Generator {
 	 * Add endpoints
 	 *
 	 * @access public
-	 * @param \Skeleton\Application\Api\Endpoint[] $endpoints
+	 * @param \Skeleton\Application\Api\Endpoint $endpoint
 	 */
-	public function add_endpoints($endpoints) {
-		$this->endpoints = $endpoints;
+	public function add_endpoint(\Skeleton\Application\Api\Endpoint $endpoint) {
+		$this->endpoints[] = $endpoint;
 	}
 
 	/**
 	 * Add security
 	 *
 	 * @access public
-	 * @param \Skeleton\Application\Api\Security[] $security
+	 * @param \Skeleton\Application\Api\Security $security
 	 */
-	public function add_security($security) {
-		$this->security = $security;
+	public function add_security(\Skeleton\Application\Api\Security $security) {
+		$this->security[] = $security;
 	}
 
 	/**
@@ -161,6 +161,7 @@ class Generator {
 			}
 		}
 		$schema['components']['schemas'] = [];
+
 		foreach ($this->components as $component) {
 			$name = $component->get_openapi_component_name();
 			$media_type = $component->get_openapi_media_type();

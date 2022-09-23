@@ -26,7 +26,6 @@ trait Component {
 		$media_type->additional_properties = $this->get_openapi_additional_properties();
 
 		return $media_type;
-
 	}
 
 	/**
@@ -41,7 +40,6 @@ trait Component {
 		$name = str_replace('\\', '_', $name);
 		return $name;
 	}
-
 
 	/**
 	 * Get openapi component properties

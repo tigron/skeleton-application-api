@@ -10,7 +10,42 @@
 
 namespace Skeleton\Application\Api;
 
+use \Skeleton\Application\Api\Path\Response;
+
 class Exception extends \Exception {
+	use \Skeleton\Application\Api\Component;
+
+	/**
+	 * Get the name of the component
+	 *
+	 * @access public
+	 * @return string $name
+	 */
+	public function get_openapi_component_name():string {
+		$application = \Skeleton\Core\Application::get();
+		$name = str_replace($application->exception_namespace, '', '\\' . get_class($this));
+		$name = 'Exception_' . str_replace('\\', '_', $name);
+		return $name;
+	}
+
+	/**
+	 * Get schema
+	 *
+	 * @access public
+	 * @return array $schema
+	 */
+	public function get_response() {
+		$response = new Response();
+		$response->code = $this->getCode();
+		$response->description = $this->getMessage();
+		if (property_exists($this, 'body')) {
+			$media_type = new \Skeleton\Application\Api\Media\Type();
+			$media_type->type = 'string';
+			$media_type->description = 'The error message';
+			$response->content = $media_type;
+		}
+		return $response;
+	}
 
 	/**
 	 * Output
@@ -19,7 +54,10 @@ class Exception extends \Exception {
 	 */
 	public function output() {
 		header($_SERVER["SERVER_PROTOCOL"] . ' ' . $this->getCode() . ' ' . $this->getMessage(), true);
-		echo json_encode($this->getMessage());
+
+		if (isset($this->body)) {
+			echo json_encode($this->body);
+		}
 		return;
 	}
 

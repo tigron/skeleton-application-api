@@ -124,8 +124,15 @@ class Api extends \Skeleton\Core\Application {
 			foreach ($this->get_components() as $component) {
 				$generator->add_component($component);
 			}
-			$generator->add_endpoints($this->get_endpoints());
-			$generator->add_security($this->get_security());
+
+			foreach ($this->get_endpoints() as $endpoint) {
+				$generator->add_endpoint($endpoint);
+			}
+
+			foreach ($this->get_security() as $security) {
+				$generator->add_security($security);
+			}
+
 			$generator->serve('json');
 		}
 
@@ -365,11 +372,16 @@ class Api extends \Skeleton\Core\Application {
 		$endpoints = [];
 
 		foreach ($files as $file) {
-			$pathinfo = pathinfo($file);
-			$endpoint = str_replace($this->endpoint_path, '', $pathinfo['dirname'] . DIRECTORY_SEPARATOR) . $pathinfo['filename'];
-			$endpoint = str_replace(DIRECTORY_SEPARATOR, '\\', $endpoint);
+			$file = str_replace($this->endpoint_path, '', $file);
 
-			$classname = "\\App\\" . ucfirst($this->name) . "\Endpoint\\" . $endpoint;
+			$pathinfo = pathinfo($file);
+			$classname = '';
+			if ($pathinfo['dirname'] !== '.') {
+				$classname .= $pathinfo['dirname'] . '/';
+			}
+			$classname .= $pathinfo['filename'];
+			$classname = str_replace(DIRECTORY_SEPARATOR, '\\', $classname);
+			$classname = $this->endpoint_namespace . $classname;
 			$class = new $classname();
 			$endpoints[] = $class;
 		}
@@ -395,9 +407,8 @@ class Api extends \Skeleton\Core\Application {
 				$classname .= $pathinfo['dirname'] . '/';
 			}
 			$classname .= $pathinfo['filename'];
-			$component = str_replace(DIRECTORY_SEPARATOR, '\\', $classname);
-
-			$classname = "\\App\\" . ucfirst($this->name) . "\Component\\" . $component;
+			$classname = str_replace(DIRECTORY_SEPARATOR, '\\', $classname);
+			$classname = $this->component_namespace . $classname;
 			$class = new $classname();
 			$components[] = $class;
 		}
@@ -418,15 +429,18 @@ class Api extends \Skeleton\Core\Application {
 		$securities = [];
 
 		foreach ($files as $file) {
+			$file = str_replace($this->security_path, '', $file);
 			$pathinfo = pathinfo($file);
-			$security = $pathinfo['filename'];
-			$security = str_replace(DIRECTORY_SEPARATOR, '\\', $security);
-
-			$classname = "\\App\\" . ucfirst($this->name) . "\Security\\" . $security;
+			$classname = '';
+			if ($pathinfo['dirname'] !== '.') {
+				$classname .= $pathinfo['dirname'] . '/';
+			}
+			$classname .= $pathinfo['filename'];
+			$classname = str_replace(DIRECTORY_SEPARATOR, '\\', $classname);
+			$classname = $this->security_namespace . $classname;
 			$class = new $classname();
 			$securities[] = $class;
 		}
 		return $securities;
 	}
-
 }

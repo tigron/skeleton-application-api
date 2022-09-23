@@ -377,9 +377,7 @@ class Path {
 						throw new \Exception('Incorrect exception specified in docblock for method ' . $endpoint->_get_name() . '/' . $method->name);
 					}
 					$class = new $classname();
-					$response = new Response();
-					$response->code = $class->getCode();
-					$response->description = $class->getMessage();
+					$response = $class->get_response();
 					$path->responses[] = $response;
 				}
 

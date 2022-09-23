@@ -132,7 +132,6 @@ abstract class Endpoint {
 		} else {
 			echo json_encode($response, JSON_PRETTY_PRINT);
 		}
-		$application->call_event_if_exists('application', 'teardown', [$this]);
 	}
 
 	/**

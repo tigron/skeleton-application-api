@@ -69,6 +69,7 @@ abstract class Security {
 				throw new \Exception('Incorrect exception specified in docblock for method ' . $this->get_name() . '/' . $method->name);
 			}
 			$class = new $classname();
+
 			$response = new Path\Response();
 			$response->code = $class->getCode();
 			$response->description = $class->getMessage();
