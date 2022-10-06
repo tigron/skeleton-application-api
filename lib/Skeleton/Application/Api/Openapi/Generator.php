@@ -170,6 +170,11 @@ class Generator {
 		}
 
 		/**
+		 * Sort schemas
+		 */
+		ksort($schema['components']['schemas']);
+
+		/**
 		 * Return the final schema
 		 */
 		return $schema;

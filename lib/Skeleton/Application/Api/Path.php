@@ -164,10 +164,9 @@ class Path {
 		 */
 		$query = \Skeleton\Core\Util::rewrite_reverse($query);
 		$application = \Skeleton\Core\Application::get();
-		if (isset($application->config->base_uri)) {
-			$query = '/' . ltrim($query, $application->config->base_uri);
+		if (!empty($application->config->base_uri) && strpos($query, $application->config->base_uri) === 0) {
+			$query = substr($query, strlen($application->config->base_uri));
 		}
-
 		/**
 		 * 3. We don't want to show $_GET parameters in specifications. Let's
 		 * clean them. Important: $_GET['action'] cannot be removed.
