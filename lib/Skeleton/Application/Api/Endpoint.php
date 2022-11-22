@@ -11,7 +11,7 @@ namespace Skeleton\Application\Api;
 use \Skeleton\Application\Api\Path\Parameter;
 use \Skeleton\Application\Api\Path\Response;
 
-abstract class Endpoint {
+abstract class Endpoint extends \Skeleton\Core\Application\Module {
 
 	/**
 	 * Get name
