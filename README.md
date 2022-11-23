@@ -279,6 +279,14 @@ To define a component, an array of media types needs to be returned.
 
 	$media_type->value_type = $value_type;
 
+#### Object-Text
+
+This media type automatically adds object-text definition to openapi.
+
+	$media_type = new \Skeleton\Application\Api\Media\Type\Object\Text();
+	$media_type->object = $my_object;
+	$media_type->field = 'name';
+	$properties['name'] = $media_type;
 
 #### Mixed media types
 

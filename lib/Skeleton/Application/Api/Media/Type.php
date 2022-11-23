@@ -241,6 +241,9 @@ class Type {
 		}
 
 		$schema['type'] = 'object';
+		if ($this->description !== null) {
+			$schema['description'] = $this->description;
+		}
 		$schema['properties'] = [];
 		foreach ($this->properties as $key => $property) {
 			$schema['properties'][$key] = $property->get_schema(true);

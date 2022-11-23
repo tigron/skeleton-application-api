@@ -99,7 +99,21 @@ trait Component {
 	public function get_openapi_component_info():array {
 		$info = [];
 
-		foreach ($this->get_component_properties() as $field => $definition) {
+		foreach ($this->get_openapi_component_properties() as $field => $definition) {
+			if (is_a($definition, 'Skeleton\Application\Api\Media\Type\Object\Text')) {
+				$language_interface = \Skeleton\I18n\Config::$language_interface;
+				$languages = $language_interface::get_all();
+				$info[$field] = [];
+				foreach ($languages as $language) {
+					if (!$language->is_translatable() and !$language->is_base()) {
+						continue;
+					}
+					$key = 'text_' . $language->name_short . '_' . $definition->field;
+					$info[$field][$language->name_short] = $definition->object->$key;
+				}
+				continue;
+			}
+
 			if (!isset($this->$field)) {
 				$info[$field] = null;
 			} else {
