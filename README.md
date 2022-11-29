@@ -44,12 +44,19 @@ The following configurations can be set:
 |version|The version of the OpenAPI document (which is distinct from the OpenAPI Specification version or the API implementation version)|1.0.0||
 |contact|Array with contact information. The following keys are supported: 'name', 'url', 'email'|[]|[ 'name' => 'My name', 'url' => 'http://company.website', 'email' => 'me@company.website']|
 
+## Events
+
+Events can be created to perform a task at specific key points during the
+application's execution. This application supports all available events
+described in [skeleton-core](https://github.com/tigron/skeleton-core).
+Additionally, the following events are available:
+
+
 ## Endpoints
 
 Endpoints will determine the tags and paths that will be created in the openapi
 application. Every endpoint needs to extend from \Skeleton\Application\Api\Endpoint
 Let's look at an example:
-
 
     <?php
     namespace App\Openapi\Endpoint;

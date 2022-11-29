@@ -64,7 +64,7 @@ abstract class Endpoint extends \Skeleton\Core\Application\Module {
 	public function accept_request() {
 		// Bootstrap the application
 		$application = \Skeleton\Core\Application::get();
-		$application->call_event_if_exists('application', 'bootstrap', [$this]);
+		$application->call_event_if_exists('endpoint', 'bootstrap', [$this]);
 
 		// Find the method name to call
 		$method = strtolower($_SERVER['REQUEST_METHOD']);
@@ -132,7 +132,7 @@ abstract class Endpoint extends \Skeleton\Core\Application\Module {
 		} else {
 			echo json_encode($response, JSON_PRETTY_PRINT);
 		}
-		$application->call_event_if_exists('application', 'teardown', [$this]);
+		$application->call_event_if_exists('endpoint', 'teardown', [$this]);
 	}
 
 	/**
