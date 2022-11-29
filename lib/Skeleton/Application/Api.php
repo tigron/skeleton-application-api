@@ -112,7 +112,7 @@ class Api extends \Skeleton\Core\Application {
 	 */
 	public function run() {
 		try {
-			\Skeleton\Core\Web\Media::detect($this->request_relative_uri);
+			\Skeleton\Core\Http\Media::detect($this->request_relative_uri);
 		} catch (\Skeleton\Core\Exception\Media\Not\Found $e) {
 			\Skeleton\Core\Web\HTTP\Status::code_404('media');
 		}
@@ -147,7 +147,7 @@ class Api extends \Skeleton\Core\Application {
 		}
 
 		if ($request['dirname'] == '/' and $request['filename'] == '') {
-			$template = \Skeleton\Core\Web\Template::get();
+			$template = \Skeleton\Application\Web\Template::get();
 			if (isset($this->config->base_uri)) {
 				$template->assign('base_uri', $this->config->base_uri);
 				if (isset($this->config->title)) {
