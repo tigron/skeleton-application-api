@@ -176,13 +176,13 @@ class Api extends \Skeleton\Core\Application {
 				if ($this->event_exists('module', 'not_found')) {
 					$this->call_event_if_exists('module', 'not_found');
 				} else {
-					\Skeleton\Core\Web\HTTP\Status::code_404('module');
+					\Skeleton\Core\Http\Status::code_404('module');
 				}
 			}
 		}
 
 		if (!is_a($endpoint, 'Skeleton\Application\Api\Endpoint')) {
-			\Skeleton\Core\Web\HTTP\Status::code_404('module');
+			\Skeleton\Core\Http\Status::code_404('module');
 		}
 
 		// All what will be outputted after this is JSON
@@ -345,7 +345,7 @@ class Api extends \Skeleton\Core\Application {
 			'Error' => '\\Skeleton\\Application\\Api\\Event\\Error',
 		];
 		return array_merge($parent_events, $web_events);
-	}	
+	}
 
 	/**
 	 * Call event if exists
