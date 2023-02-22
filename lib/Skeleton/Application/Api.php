@@ -114,7 +114,7 @@ class Api extends \Skeleton\Core\Application {
 		try {
 			\Skeleton\Core\Web\Media::detect($this->request_relative_uri);
 		} catch (\Skeleton\Core\Exception\Media\Not\Found $e) {
-			\Skeleton\Core\Web\HTTP\Status::code_404('media');
+			\Skeleton\Core\Http\Status::code_404('media');
 		}
 
 		$request = pathinfo($this->request_relative_uri);
@@ -176,13 +176,13 @@ class Api extends \Skeleton\Core\Application {
 				if ($this->event_exists('module', 'not_found')) {
 					$this->call_event_if_exists('module', 'not_found');
 				} else {
-					\Skeleton\Core\Web\HTTP\Status::code_404('module');
+					\Skeleton\Core\Http\Status::code_404('module');
 				}
 			}
 		}
 
 		if (!is_a($endpoint, 'Skeleton\Application\Api\Endpoint')) {
-			\Skeleton\Core\Web\HTTP\Status::code_404('module');
+			\Skeleton\Core\Http\Status::code_404('module');
 		}
 
 		// All what will be outputted after this is JSON

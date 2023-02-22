@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "tigron/skeleton-core": ">=3.0.1",
+        "tigron/skeleton-core": ">=4",
         "tigron/skeleton-template-twig": ">=2",
         "phpdocumentor/reflection-docblock": "~5.2"
     },
