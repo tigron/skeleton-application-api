@@ -112,7 +112,7 @@ class Api extends \Skeleton\Core\Application {
 	 */
 	public function run() {
 		try {
-			\Skeleton\Core\Web\Media::detect($this->request_relative_uri);
+			\Skeleton\Core\Http\Media::detect($this->request_relative_uri);
 		} catch (\Skeleton\Core\Exception\Media\Not\Found $e) {
 			\Skeleton\Core\Http\Status::code_404('media');
 		}
