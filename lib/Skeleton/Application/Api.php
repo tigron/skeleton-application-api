@@ -147,7 +147,7 @@ class Api extends \Skeleton\Core\Application {
 		}
 
 		if ($request['dirname'] == '/' and $request['filename'] == '') {
-			$template = \Skeleton\Core\Web\Template::get();
+			$template = \Skeleton\Application\Web\Template::get();
 			if (isset($this->config->base_uri)) {
 				$template->assign('base_uri', $this->config->base_uri);
 				if (isset($this->config->title)) {
@@ -326,6 +326,25 @@ class Api extends \Skeleton\Core\Application {
 
 		$request_relative_uri = str_replace('_', '/', $request_relative_uri);
 		return \Skeleton\Application\Api\Endpoint::resolve($request_relative_uri);
+	}
+
+	/**
+	 * Get events
+	 *
+	 * Get a list of events for this application.
+	 * The returned array has the context as key, the value is the classname
+	 * of the default event
+	 *
+	 * @access protected
+	 * @return array $events
+	 */
+	protected function get_events(): array {
+		$parent_events = parent::get_events();
+		$web_events = [
+			'Endpoint' => '\\Skeleton\\Application\\Api\\Event\\Endpoint',
+			'Error' => '\\Skeleton\\Application\\Api\\Event\\Error',
+		];
+		return array_merge($parent_events, $web_events);
 	}
 
 	/**
