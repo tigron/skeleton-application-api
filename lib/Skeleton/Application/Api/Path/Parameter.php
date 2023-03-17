@@ -58,12 +58,7 @@ class Parameter {
 	 */
 	public function get_schema() {
 		$schema = [];
-		// if the parameter is an array, add [] to the name
-		if ($this->media_type->type == 'array') {
-			$schema['name'] = $this->name . '[]';
-		} else {
-			$schema['name'] = $this->name;
-		}
+		$schema['name'] = $this->name;
 		$schema['required'] = $this->required;
 		$schema['in'] = $this->in;
 		$schema['schema'] = $this->media_type->get_schema();

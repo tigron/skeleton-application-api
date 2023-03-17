@@ -114,7 +114,7 @@ class Api extends \Skeleton\Core\Application {
 		try {
 			\Skeleton\Core\Http\Media::detect($this->request_relative_uri);
 		} catch (\Skeleton\Core\Exception\Media\Not\Found $e) {
-			\Skeleton\Core\Http\Status::code_404('media');
+			\Skeleton\Core\Web\HTTP\Status::code_404('media');
 		}
 
 		$request = pathinfo($this->request_relative_uri);
@@ -165,6 +165,11 @@ class Api extends \Skeleton\Core\Application {
 		 */
 		$endpoint = null;
 
+		/**
+		 * Better querystring parsing
+		 */
+		$_GET = $this->parse_querystring($_SERVER['QUERY_STRING']);
+
 		try {
 			// Attempt to find the module by matching defined routes
 			$endpoint = $this->route($this->request_relative_uri);
@@ -188,6 +193,45 @@ class Api extends \Skeleton\Core\Application {
 		// All what will be outputted after this is JSON
 		header('Content-Type: application/json');
 		$endpoint->accept_request();
+	}
+
+	/**
+	 * Parse query string
+	 *
+	 * The default query string parsing for PHP uses '[]' for arrays. There
+	 * is no support for query variables with identical names
+	 *
+	 * @access private
+	 * @return array $query
+	 */
+	private function parse_querystring($querystring) {
+		# result array
+		$query = [];
+
+		# split on outer delimiter
+		$pairs = explode('&', $querystring);
+
+		# loop through each pair
+		foreach ($pairs as $i) {
+			# split into name and value
+			list($name, $value) = explode('=', $i, 2);
+
+			# if name already exists
+			if ( isset($query[$name]) ) {
+				# stick multiple values into an array
+				if ( is_array($query[$name]) ) {
+					$query[$name][] = $value;
+				} else {
+					$query[$name] = [ $query[$name], $value ];
+				}
+			} else {
+				# otherwise, simply stick it in a scalar
+				$query[$name] = $value;
+			}
+		}
+
+		# return result array
+		return $query;
 	}
 
 	/**
@@ -220,7 +264,7 @@ class Api extends \Skeleton\Core\Application {
 		$routes = $this->config->routes;
 
 		/**
-		 * We need to find the route that matches the most the fixed parts
+		 * We need to find the route that matches the most fixed parts
 		 */
 		$matched_module = null;
 		$best_matches_fixed_parts = 0;
