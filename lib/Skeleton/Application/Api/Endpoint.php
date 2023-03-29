@@ -73,7 +73,7 @@ abstract class Endpoint extends \Skeleton\Core\Application\Module {
 		}
 
 		if (!is_callable([$this, $method])) {
-			\Skeleton\Core\Web\HTTP\Status::code_404('endpoint');
+			\Skeleton\Core\Http\Status::code_404('endpoint');
 		}
 
 		$paths = $this->_get_paths();
@@ -85,7 +85,7 @@ abstract class Endpoint extends \Skeleton\Core\Application\Module {
 		}
 
 		if ($requested_path === null) {
-			\Skeleton\Core\Web\HTTP\Status::code_404('endpoint');
+			\Skeleton\Core\Http\Status::code_404('endpoint');
 		}
 
 

@@ -114,7 +114,7 @@ class Api extends \Skeleton\Core\Application {
 		try {
 			\Skeleton\Core\Http\Media::detect($this->request_relative_uri);
 		} catch (\Skeleton\Core\Exception\Media\Not\Found $e) {
-			\Skeleton\Core\Web\HTTP\Status::code_404('media');
+			\Skeleton\Core\Http\Status::code_404('media');
 		}
 
 		$request = pathinfo($this->request_relative_uri);
@@ -214,7 +214,12 @@ class Api extends \Skeleton\Core\Application {
 		# loop through each pair
 		foreach ($pairs as $i) {
 			# split into name and value
-			list($name, $value) = explode('=', $i, 2);
+			$parts = explode('=', $i, 2);
+			if (count($parts) !== 2) {
+				continue;
+			}
+
+			list($name, $value) = $parts;
 
 			# if name already exists
 			if ( isset($query[$name]) ) {
