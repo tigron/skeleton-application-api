@@ -221,6 +221,9 @@ class Api extends \Skeleton\Core\Application {
 
 			list($name, $value) = $parts;
 
+			$name = urldecode($name);
+			$value = urldecode($value);
+
 			# if name already exists
 			if ( isset($query[$name]) ) {
 				# stick multiple values into an array
