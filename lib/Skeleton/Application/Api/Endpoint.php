@@ -90,6 +90,7 @@ abstract class Endpoint extends \Skeleton\Core\Application\Module {
 		$generator = new \Skeleton\Application\Api\Body\Generator($current_path->body->media_type);
 		$generator->set_body($info);
 		$errors = $generator->validate();
+
 		if (count($errors) > 0) {
 			$exception = new \Skeleton\Application\Api\Exception\Bad\Request();
 			$exception->set_errors($errors);
