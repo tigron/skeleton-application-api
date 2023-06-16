@@ -16,6 +16,14 @@ class Exception extends \Exception {
 	use \Skeleton\Application\Api\Component;
 
 	/**
+	 * Body
+	 *
+	 * @access public
+	 * @var string $body
+	 */
+	public $body = null;
+
+	/**
 	 * Get the name of the component
 	 *
 	 * @access public
@@ -56,7 +64,7 @@ class Exception extends \Exception {
 		header($_SERVER["SERVER_PROTOCOL"] . ' ' . $this->getCode() . ' ' . $this->getMessage(), true);
 
 		if (isset($this->body)) {
-			echo json_encode($this->body);
+			echo json_encode($this->body, JSON_PRETTY_PRINT);
 		}
 		return;
 	}

@@ -98,7 +98,7 @@ In the class, docblock data is used to:
 
 Every parameter that can be accepted should be defined via "@param {TYPE} {NAME} {DESCRIPTION}"
 The type can be a primitive datatype (int, integer, boolean, float) or an
-array an array of primitive datatypes.
+array of primitive datatypes.
 
 A definition of an array:
 
@@ -120,6 +120,13 @@ If the path accepts a body, it should be declared in the docblock via
 
 The body-class is a component and needs to implement the specific methods
 required for a component.
+The body can be retrieved by calling:
+
+    $body = $this->get_body();
+
+The $body variable will be an instance of the component defined in the docblock.
+The returned object will automatically be validated against the component
+properties, defined in the component.
 
 ### Exceptions
 

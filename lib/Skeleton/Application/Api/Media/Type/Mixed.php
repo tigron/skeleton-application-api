@@ -27,6 +27,10 @@ class Mixed extends \Skeleton\Application\Api\Media\Type {
 	 */
 	public $criteria = 'anyOf';
 
+	public function __construct() {
+		$this->type = 'mixed';
+	}
+
 	/**
 	 * Validate
 	 *

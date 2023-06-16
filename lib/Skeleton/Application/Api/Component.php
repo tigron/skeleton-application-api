@@ -7,8 +7,58 @@
  */
 
 namespace Skeleton\Application\Api;
+use Skeleton\Application\Api\Exception;
 
 trait Component {
+
+	/**
+	 * Store local properties
+	 *
+	 * @access private
+	 * @var array $properties
+	 */
+	private $properties = [];
+
+	/**
+	 * Get a detail
+	 *
+	 * @access public
+	 * @param string $key
+	 * @return mixed $value
+	 */
+	public function __get($key) {
+		if (is_array($this->properties) && array_key_exists($key, $this->properties)) {
+			return $this->properties[$key];
+		}
+
+		throw new \Exception('Unknown key requested: ' . $key);
+	}
+
+	/**
+	 * Isset
+	 *
+	 * @access public
+	 * @param string $key
+	 * @return bool $isset
+	 */
+	public function __isset($key) {
+		if (is_array($this->properties) && isset($this->properties[$key])) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Set a detail
+	 *
+	 * @access public
+	 * @param string $key
+	 * @param mixex $value
+	 */
+	public function __set($key, $value) {
+		$this->properties[$key] = $value;
+	}
 
 	/**
 	 * Get the media type for this object
@@ -122,5 +172,4 @@ trait Component {
 		}
 		return $info;
 	}
-
 }

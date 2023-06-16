@@ -57,6 +57,49 @@ abstract class Endpoint extends \Skeleton\Core\Application\Module {
 	}
 
 	/**
+	 * Get body
+	 *
+	 * @access public
+	 */
+	public function get_body() {
+		// Find the method
+		$method = debug_backtrace()[1]['function'];
+		// Get the path object for this method
+		$paths = $this->_get_paths();
+		$current_path = null;
+		foreach ($paths as $path) {
+			if ($path->method === $method) {
+				$current_path = $path;
+			}
+		}
+
+		if ($current_path === null) {
+			throw new \Exception('Cannot find path for "' . $method . '"');
+		}
+
+		if (!isset($current_path->body)) {
+			throw new \Skeleton\Application\Api\Exception\Bad\Request();
+		}
+
+		try {
+			$info = json_decode(file_get_contents('php://input'), true, 512, JSON_THROW_ON_ERROR);
+		} catch (\JsonException $exception) {
+			throw new \Skeleton\Application\Api\Exception\Bad\Request();
+		}
+
+		$generator = new \Skeleton\Application\Api\Body\Generator($current_path->body->media_type);
+		$generator->set_body($info);
+		$errors = $generator->validate();
+		if (count($errors) > 0) {
+			$exception = new \Skeleton\Application\Api\Exception\Bad\Request();
+			$exception->set_errors($errors);
+			throw $exception;
+		}
+
+		return $generator->generate();
+	}
+
+	/**
 	 * Accept request
 	 *
 	 * @access public
@@ -90,6 +133,7 @@ abstract class Endpoint extends \Skeleton\Core\Application\Module {
 
 
 		$reflection_method = new \ReflectionMethod($this, $method);
+
 		// Verify if security is ok
 		foreach ($requested_path->security as $security) {
 			try {
