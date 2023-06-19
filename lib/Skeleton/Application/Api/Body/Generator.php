@@ -92,6 +92,16 @@ class Generator {
 	}
 
 	/**
+	 * Generate an integer
+	 *
+	 * @access public
+	 * @return int $integer
+	 */
+	private function generate_integer() {
+		return $this->body;
+	}
+
+	/**
 	 * Generate an array
 	 *
 	 * @access private
@@ -352,7 +362,7 @@ class Generator {
 			'message' => "should be " . $this->media_type->type
 		];
 		$this->errors[] = $error;
-	}	
+	}
 
 	/**
 	 * Validate boolean
