@@ -102,6 +102,16 @@ class Generator {
 	}
 
 	/**
+	 * Generate a boolean
+	 *
+	 * @access public
+	 * @return bool $boolean
+	 */
+	private function generate_boolean() {
+		return $this->body;
+	}
+
+	/**
 	 * Generate an array
 	 *
 	 * @access private
