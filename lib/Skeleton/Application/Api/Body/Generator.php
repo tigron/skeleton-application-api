@@ -218,6 +218,22 @@ class Generator {
 	public function validate() {
 		$type = $this->media_type->type;
 
+		if (
+			(
+				isset($this->media_type->nullable)
+				&& $this->media_type->nullable
+				&& $this->body === null
+			)
+			||
+			(
+				!isset($this->media_type->nullable)
+				&& $this->body === null
+			)
+		) {
+			// nullable values are allowed, stop validating
+			return [];
+		}
+
 		if (is_callable( [$this, 'validate_' . $type])) {
 			call_user_func_array( [$this, 'validate_' . $type], []);
 		}
@@ -423,7 +439,7 @@ class Generator {
 				continue;
 			}
 			// From here, the property is provided
-			if (!$media_type->nullable and $this->body[$field] === null) {
+			if (isset($media_type->nullable) and !$media_type->nullable and $this->body[$field] === null) {
 				$error = [
 					'keyword' => 'nullable',
 					'dataPath' => $this->datapath,

@@ -50,7 +50,7 @@ class Type {
 	 * @access public
 	 * @var boolean $nullable
 	 */
-	public $nullable = false;
+	public $nullable = null;
 
 	/**
 	 * Properties
