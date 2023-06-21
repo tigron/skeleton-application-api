@@ -245,8 +245,16 @@ class Type {
 			$schema['description'] = $this->description;
 		}
 		$schema['properties'] = [];
+		$required_properties = [];
 		foreach ($this->properties as $key => $property) {
 			$schema['properties'][$key] = $property->get_schema(true);
+			if ($property->required) {
+				$required_properties[] = $key;
+			}
+		}
+
+		if (count($required_properties) > 0) {
+			$schema['required'] = $required_properties;
 		}
 
 		if (count($schema['properties']) == 0) {
