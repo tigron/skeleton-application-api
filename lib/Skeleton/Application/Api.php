@@ -298,7 +298,7 @@ class Api extends \Skeleton\Core\Application {
 							// Check if the given parameter defines an action
 							$method = strtolower($_SERVER['REQUEST_METHOD']) . '_' . $request_parts[$key];
 
-							if (is_callable([$module, $method])) {
+							if (is_callable([new $module, $method])) {
 								$matches_fixed_parts++;
 								continue;
 							}
