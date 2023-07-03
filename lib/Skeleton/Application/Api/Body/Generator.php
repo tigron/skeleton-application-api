@@ -186,7 +186,7 @@ class Generator {
 
 			$property_generator = new self($media_type);
 			$property_generator->set_body( $this->body[$field] );
-			$property_generator->datapath .= '.' . $field;
+			$property_generator->datapath = $this->datapath . '.' . $field;
 			$class->$field = $property_generator->generate();
 		}
 
@@ -202,7 +202,7 @@ class Generator {
 			}
 			$property_generator = new self($media_type);
 			$property_generator->set_body( $this->body[$field] );
-			$property_generator->datapath .= '.' . $field;
+			$property_generator->datapath .= $this->datapath . '.' . $field;
 			$class->$field = $property_generator->generate();
 		}
 
@@ -261,9 +261,15 @@ class Generator {
 	private function validate_mixed_anyof() {
 		$anyof = [];
 		foreach ($this->media_type->media_types as $media_type) {
-			$anyof[] = $media_type->type;
+			if ($media_type->type === 'object') {
+				$component = new $media_type->value_type;
+				$anyof[] = $media_type->type . ' ' . $component->get_openapi_component_name();
+			} else {
+				$anyof[] = $media_type->type;
+			}
 			$generator = new self($media_type);
 			$generator->set_body($this->body);
+			$generator->datapath = $this->datapath;
 			$errors = $generator->validate();
 
 			if (count($errors) === 0) {
@@ -320,10 +326,11 @@ class Generator {
 			return;
 		}
 
-		foreach ($this->body as $item) {
+		foreach ($this->body as $key => $item) {
 			$value_type = $this->media_type->value_type;
 			$generator = new self($value_type);
 			$generator->set_body($item);
+			$generator->datapath = $this->datapath . '[' . $key . ']';
 			$errors = array_merge($errors, $generator->validate());
 		}
 
@@ -336,18 +343,31 @@ class Generator {
 	 * @access private
 	 */
 	private function validate_string() {
-		if (is_string($this->body)) {
-			return;
+		$valid = true;
+		if (!is_string($this->body)) {
+			$valid = false;
 		}
-		$error = [
-			'keyword' => 'type',
-			'dataPath' => $this->datapath,
-			'params' => [
-				'type' => $this->media_type->type
-			],
-			'message' => "should be " . $this->media_type->type
-		];
-		$this->errors[] = $error;
+
+		if ($valid && is_array($this->media_type->enum)) {
+			if (!in_array($this->body, $this->media_type->enum)) {
+				$valid = false;
+			}
+		}
+
+		if ($valid === false) {
+			$error = [
+				'keyword' => 'type',
+				'dataPath' => $this->datapath,
+				'params' => [
+					'type' => $this->media_type->type
+				],
+				'message' => "should be " . $this->media_type->type
+			];
+			if (is_array($this->media_type->enum)) {
+				$error['message'] .= ' with any of the following values: ' . implode(', ', $this->media_type->enum);
+			}
+			$this->errors[] = $error;
+		}
 	}
 
 	/**
@@ -419,13 +439,14 @@ class Generator {
 		$classname = $this->media_type->value_type;
 		$class = new $classname();
 		$fields = [];
+
 		foreach ($class->get_openapi_component_properties() as $field => $media_type) {
 			$fields[] = $field;
 			// If property is required but not provided: error
 			if ($media_type->required and !array_key_exists($field, $this->body)) {
 				$error = [
 					'keyword' => 'required',
-					'dataPath' => $this->datapath,
+					'dataPath' => $this->datapath . '.' . $field,
 					'params' => [
 						'missingProperty' => $field
 					],
@@ -442,7 +463,7 @@ class Generator {
 			if (isset($media_type->nullable) and !$media_type->nullable and $this->body[$field] === null) {
 				$error = [
 					'keyword' => 'nullable',
-					'dataPath' => $this->datapath,
+					'dataPath' => $this->datapath . '.' . $field,
 					'params' => [
 						'missingProperty' => $field
 					],
@@ -470,7 +491,7 @@ class Generator {
 			}
 			$property_generator = new self($media_type);
 			$property_generator->set_body( $this->body[$field] );
-			$property_generator->datapath .= '.' . $field;
+			$property_generator->datapath = $this->datapath . '.' . $field;
 			$this->errors = array_merge($this->errors, $property_generator->validate());
 		}
 		return $this->errors;
