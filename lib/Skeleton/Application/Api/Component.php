@@ -26,7 +26,7 @@ trait Component {
 	 * @param string $key
 	 * @return mixed $value
 	 */
-	public function __get($key) {
+	public function __get($key): mixed {
 		if (is_array($this->properties) && array_key_exists($key, $this->properties)) {
 			return $this->properties[$key];
 		}
@@ -45,7 +45,7 @@ trait Component {
 	 * @param string $key
 	 * @return bool $isset
 	 */
-	public function __isset($key) {
+	public function __isset($key): bool {
 		if (is_array($this->properties) && isset($this->properties[$key])) {
 			return true;
 		}
@@ -64,7 +64,7 @@ trait Component {
 	 * @param string $key
 	 * @param mixex $value
 	 */
-	public function __set($key, $value) {
+	public function __set($key, $value): void {
 		$this->properties[$key] = $value;
 
 		if (is_callable('parent::__set')) {
@@ -129,7 +129,7 @@ trait Component {
 	 * Get additional properties for the openapi object
 	 *
 	 * @access public
-	 * @return \Skeleton\Application\Api\Media\Type|null $additional_properties
+	 * @return ?\Skeleton\Application\Api\Media\Type $additional_properties
 	 */
 	public function get_openapi_additional_properties(): ?\Skeleton\Application\Api\Media\Type {
 		return null;
