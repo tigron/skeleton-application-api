@@ -222,7 +222,7 @@ from the component classname. The namespace from the app is ignored.
 Returns an array with Media\Type objects. The key of each element in the array
 becomes the name of the property.
 
-	public function get_openapi_additional_properties();
+	public function get_openapi_additional_properties(): ?\Skeleton\Application\Api\Media\Type;
 
 If the component has optional properties, they can be returned in this method.
 The array should have the same structure as the one returned by
