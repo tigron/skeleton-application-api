@@ -30,6 +30,7 @@ trait Component {
 		if (is_array($this->properties) && array_key_exists($key, $this->properties)) {
 			return $this->properties[$key];
 		}
+
 		if (is_callable('parent::__get')) {
 			return parent::__get($key);
 		}
@@ -48,6 +49,7 @@ trait Component {
 		if (is_array($this->properties) && isset($this->properties[$key])) {
 			return true;
 		}
+
 		if (is_callable('parent::__isset')) {
 			return parent::__isset($key);
 		}
@@ -64,9 +66,10 @@ trait Component {
 	 */
 	public function __set($key, $value) {
 		$this->properties[$key] = $value;
+
 		if (is_callable('parent::__set')) {
 			parent::__set($key, $value);
-		}		
+		}
 	}
 
 	/**
@@ -79,9 +82,11 @@ trait Component {
 		$media_type = new \Skeleton\Application\Api\Media\Type();
 		$media_type->type = 'object';
 		$media_type->value_type = get_class($this);
+
 		foreach ($this->get_openapi_component_properties() as $key => $property) {
 			$media_type->properties[$key] = $property;
 		}
+
 		$media_type->additional_properties = $this->get_openapi_additional_properties();
 
 		return $media_type;
@@ -93,7 +98,7 @@ trait Component {
 	 * @access public
 	 * @return string $name
 	 */
-	public function get_openapi_component_name():string {
+	public function get_openapi_component_name(): string {
 		$application = \Skeleton\Core\Application::get();
 		$name = str_replace($application->component_namespace, '', '\\' . get_class($this));
 		$name = str_replace('\\', '_', $name);
@@ -106,7 +111,7 @@ trait Component {
 	 * @access public
 	 * @return array $properties
 	 */
-	public function get_openapi_component_properties():array {
+	public function get_openapi_component_properties(): array {
 		$db = self::trait_get_database();
 		$table = self::trait_get_database_table();
 
@@ -116,6 +121,7 @@ trait Component {
 		foreach ($definition as $field) {
 			$properties[ $field['Field'] ] = Media\Type::create_for_mysql_type($field['Type']);
 		}
+
 		return $properties;
 	}
 
@@ -135,7 +141,7 @@ trait Component {
 	 * @access public
 	 * @return string $description
 	 */
-	public function get_openapi_description():string {
+	public function get_openapi_description(): string {
 		return 'test description';
 	}
 
@@ -145,7 +151,7 @@ trait Component {
 	 * @access public
 	 * @return array $example
 	 */
-	public function get_openapi_example():array {
+	public function get_openapi_example(): array {
 		return [];
 	}
 
@@ -155,7 +161,7 @@ trait Component {
 	 * @access public
 	 * @return array $info
 	 */
-	public function get_openapi_component_info():array {
+	public function get_openapi_component_info(): array {
 		$info = [];
 
 		foreach ($this->get_openapi_component_properties() as $field => $definition) {
@@ -163,13 +169,16 @@ trait Component {
 				$language_interface = \Skeleton\I18n\Config::$language_interface;
 				$languages = $language_interface::get_all();
 				$info[$field] = [];
+
 				foreach ($languages as $language) {
 					if (!$language->is_translatable() and !$language->is_base()) {
 						continue;
 					}
+
 					$key = 'text_' . $language->name_short . '_' . $definition->field;
 					$info[$field][$language->name_short] = $definition->object->$key;
 				}
+
 				continue;
 			}
 
@@ -179,6 +188,7 @@ trait Component {
 				$info[$field] = $this->$field;
 			}
 		}
+
 		return $info;
 	}
 }
