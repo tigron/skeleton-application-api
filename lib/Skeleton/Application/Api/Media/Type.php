@@ -14,9 +14,9 @@ class Type {
 	 * Additional Properties
 	 *
 	 * @access public
-	 * @var $mixed $additional_properties
+	 * @var $\Skeleton\Application\Api\Media\Type|null $additional_properties
 	 */
-	public $additional_properties = true;
+	public $additional_properties = null;
 
 	/**
 	 * Description

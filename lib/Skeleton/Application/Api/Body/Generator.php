@@ -191,7 +191,7 @@ class Generator {
 		}
 
 		$media_type = $class->get_openapi_additional_properties();
-		if ($media_type === false) {
+		if ($media_type === null) {
 			return $class;
 		}
 
@@ -480,7 +480,7 @@ class Generator {
 		}
 
 		$media_type = $class->get_openapi_additional_properties();
-		if ($media_type === false) {
+		if ($media_type === null) {
 			return $this->errors;
 		}
 

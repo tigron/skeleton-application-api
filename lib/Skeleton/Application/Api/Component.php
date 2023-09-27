@@ -123,10 +123,10 @@ trait Component {
 	 * Get additional properties for the openapi object
 	 *
 	 * @access public
-	 * @return array $additional_properties
+	 * @return \Skeleton\Application\Api\Media\Type|null $additional_properties
 	 */
-	public function get_openapi_additional_properties() {
-		return false;
+	public function get_openapi_additional_properties(): ?\Skeleton\Application\Api\Media\Type {
+		return null;
 	}
 
 	/**
