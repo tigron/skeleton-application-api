@@ -148,6 +148,7 @@ class Generator {
 			foreach ($paths as $path) {
 				$schema['paths'] = array_merge_recursive($schema['paths'], $path->get_schema());
 			}
+			ksort($schema['paths']);
 		}
 
 		/**
