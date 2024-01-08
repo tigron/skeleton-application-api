@@ -31,7 +31,7 @@ trait Component {
 			return $this->properties[$key];
 		}
 
-		if (is_callable('parent::__get')) {
+		if (is_callable([parent::class, '__get'])) {
 			return parent::__get($key);
 		}
 
@@ -50,7 +50,7 @@ trait Component {
 			return true;
 		}
 
-		if (is_callable('parent::__isset')) {
+		if (is_callable([parent::class, '__isset'])) {
 			return parent::__isset($key);
 		}
 
@@ -67,7 +67,7 @@ trait Component {
 	public function __set($key, $value): void {
 		$this->properties[$key] = $value;
 
-		if (is_callable('parent::__set')) {
+		if (is_callable([parent::class, '__set'])) {
 			parent::__set($key, $value);
 		}
 	}
