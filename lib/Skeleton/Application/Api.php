@@ -51,12 +51,28 @@ class Api extends \Skeleton\Core\Application {
 	public $security_path = null;
 
 	/**
+	 * Exception path
+	 *
+	 * @var string $exception_path
+	 * @access public
+	 */
+	public $exception_path = null;
+
+	/**
 	 * Security namespace
 	 *
 	 * @var string $security_namespace
 	 * @access public
 	 */
 	public $security_namespace = null;
+
+	/**
+	 * Exception namespace
+	 *
+	 * @var string $exception_namespace
+	 * @access public
+	 */
+	public $exception_namespace = null;
 
 	/**
 	 * Get details
