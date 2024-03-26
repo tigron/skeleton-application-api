@@ -304,23 +304,25 @@ This media type automatically adds object-text definition to openapi.
 
 #### Mixed media types
 
-	$media_type_mixed = new \Skeleton\Application\Api\Media\Type\Mixed();
+Mixed media types can be described via class \Skeleton\Application\Api\Media\Type\Mix();
+
+	$media_type_mix = new \Skeleton\Application\Api\Media\Type\Mix();
 
 	$media_type1 = new \Skeleton\Application\Api\Media\Type();
 	$media_type1->type = 'object';
 	$media_type1->value_type = '\App\Api\Component\Class1';
-	$media_type_mixed->add_media_type($media_type1);
+	$media_type_mix->add_media_type($media_type1);
 
 	$media_type2 = new \Skeleton\Application\Api\Media\Type();
 	$media_type2->type = 'object';
 	$media_type2->value_type = '\App\Api\Component\Class2';
-	$media_type_mixed->add_media_type($media_type2);
+	$media_type_mix->add_media_type($media_type2);
 
 	$media_type3 = new \Skeleton\Application\Api\Media\Type();
 	$media_type3->type = 'object';
 	$media_type3->value_type = '\App\Api\Component\Class3';
-	$media_type_mixed->add_media_type($media_type3);
-	$media_type_mixed->criteria = 'anyOf'; // Possible values 'oneOf', 'allOf', 'anyOf'
+	$media_type_mix->add_media_type($media_type3);
+	$media_type_mix->criteria = 'anyOf'; // Possible values 'oneOf', 'allOf', 'anyOf'
 
 #### Extra properties
 
