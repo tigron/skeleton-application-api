@@ -26,12 +26,12 @@ trait Component {
 	 * @param string $key
 	 * @return mixed $value
 	 */
-	public function __get($key): mixed {
+	public function __get($key) {
 		if (is_array($this->properties) && array_key_exists($key, $this->properties)) {
 			return $this->properties[$key];
 		}
 
-		if (is_callable([parent::class, '__get'])) {
+		if (get_parent_class($this) !== false && is_callable([parent::class, '__get'])) {
 			return parent::__get($key);
 		}
 
@@ -50,7 +50,7 @@ trait Component {
 			return true;
 		}
 
-		if (is_callable([parent::class, '__isset'])) {
+		if (get_parent_class($this) !== false && is_callable([parent::class, '__isset'])) {
 			return parent::__isset($key);
 		}
 
@@ -67,7 +67,7 @@ trait Component {
 	public function __set($key, $value): void {
 		$this->properties[$key] = $value;
 
-		if (is_callable([parent::class, '__set'])) {
+		if (get_parent_class($this) !== false && is_callable([parent::class, '__set'])) {
 			parent::__set($key, $value);
 		}
 	}
