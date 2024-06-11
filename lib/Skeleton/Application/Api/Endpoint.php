@@ -20,12 +20,26 @@ abstract class Endpoint extends \Skeleton\Core\Application\Module {
 	 * @return string $name
 	 */
 	public function _get_name() {
+		return $this->_get_basename();
+	}
+
+	/**
+	 * Get name
+	 *
+	 * @access public
+	 * @return string $name
+	 */
+	public function _get_basename() {
 		$api = \Skeleton\Core\Application::get();
 		$class = new \ReflectionClass($this);
 		$filename = $class->getFileName();
 		$filename = str_replace($api->endpoint_path, '', $filename);
 		$filename = pathinfo($filename);
-		return strtolower($filename['filename']);
+		if ($filename['dirname'] != '.') {
+			return strtolower($filename['dirname'] . '/' . $filename['filename']);
+		} else {
+			return strtolower($filename['filename']);
+		}
 	}
 
 	/**

@@ -148,10 +148,12 @@ class Path {
 			}
 			$params[$parameter->name] = '{' . $parameter->name . '}';
 		}
+
 		if (count($params) == 0) {
-			return '/' . $this->endpoint->_get_name();
+			return '/' . $this->endpoint->_get_basename();
 		}
-		$query = $this->endpoint->_get_name() . '?';
+
+		$query = $this->endpoint->_get_basename() . '?';
 		foreach ($params as $key => $value) {
 			$query .= $key . '=' . $value . '&';
 		}
