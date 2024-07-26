@@ -79,7 +79,7 @@ class Api extends \Skeleton\Core\Application {
 	 *
 	 * @access protected
 	 */
-	protected function get_details() {
+	protected function get_details(): void {
 		parent::get_details();
 
 		$this->endpoint_path = $this->path . '/endpoint/';
@@ -105,7 +105,7 @@ class Api extends \Skeleton\Core\Application {
 	 *
 	 * @access private
 	 */
-	protected function load_config() {
+	protected function load_config(): void {
 		/**
 		 * Set some defaults
 		 */
@@ -126,7 +126,7 @@ class Api extends \Skeleton\Core\Application {
 	 *
 	 * @access public
 	 */
-	public function run() {
+	public function run(): void {
 		try {
 			\Skeleton\Core\Http\Media::detect($this->request_relative_uri);
 		} catch (\Skeleton\Core\Exception\Media\Not\Found $e) {
@@ -422,13 +422,13 @@ class Api extends \Skeleton\Core\Application {
 	 * @param string $context
 	 * @param string $action
 	 */
-	public function call_event_if_exists($context, $action, $arguments = []) {
+	public function call_event_if_exists(string $context, string $action, array $arguments = []): mixed {
 		if ($context == 'error' and $action == 'exception') {
 			// If an error occures, we need to handle it differently for API
 			$exception = array_shift($arguments);
 			$exception = new \Skeleton\Application\Api\Exception($exception->getMessage(), 500);
 			$exception->output();
-			return;
+			return null;
 		} else {
 			return parent::call_event_if_exists($context, $action, $arguments);
 		}
@@ -437,11 +437,8 @@ class Api extends \Skeleton\Core\Application {
 	 * Check if an event exists
 	 *
 	 * @access public
-	 * @param string $context
-	 * @param string $action
-	 * @return bool $exists
 	 */
-	public function event_exists($context, $action) {
+	public function event_exists(string $context, string $action): bool {
 		if ($context == 'error' and $action == 'exception') {
 			return true;
 		}

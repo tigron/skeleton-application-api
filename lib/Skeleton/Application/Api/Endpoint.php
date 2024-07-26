@@ -119,7 +119,7 @@ abstract class Endpoint extends \Skeleton\Core\Application\Module {
 	 *
 	 * @access public
 	 */
-	public function accept_request() {
+	public function accept_request(): void {
 		// Bootstrap the application
 		$application = \Skeleton\Core\Application::get();
 		$application->call_event_if_exists('endpoint', 'bootstrap', [$this]);
@@ -198,10 +198,8 @@ abstract class Endpoint extends \Skeleton\Core\Application\Module {
 	 * Resolve the requested path
 	 *
 	 * @access public
-	 * @param string $path
-	 * @return \Skeleton\Application\Api\Path $path
 	 */
-	public static function resolve($request_relative_uri) {
+	public static function resolve(string $request_relative_uri): \Skeleton\Application\Api\Endpoint {
 		$relative_uri_parts = array_values(array_filter(explode('/', $request_relative_uri)));
 		$relative_uri_parts = array_map('ucfirst', $relative_uri_parts);
 		$application = \Skeleton\Core\Application::get();
