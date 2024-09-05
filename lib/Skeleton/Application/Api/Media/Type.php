@@ -69,6 +69,14 @@ class Type {
 	public $readonly = null;
 
 	/**
+	 * Default
+	 *
+	 * @access public
+	 * @var bool $default
+	 */
+	public $default = null;
+
+	/**
 	 * Writeonly
 	 *
 	 * @access public
@@ -283,6 +291,9 @@ class Type {
 		if (isset($this->readonly) and $this->readonly !== false) {
 			$schema['readOnly'] = $this->readonly;
 		}
+		if (isset($this->default)) {
+			$schema['default'] = $this->default;
+		}
 		if (isset($this->writeonly) and $this->writeonly !== false) {
 			$schema['writeOnly'] = $this->writeonly;
 		}
@@ -307,6 +318,9 @@ class Type {
 		}
 		if (isset($this->readonly) and $this->readonly !== false) {
 			$schema['readOnly'] = $this->readonly;
+		}
+		if (isset($this->default)) {
+			$schema['default'] = $this->default;
 		}
 		if (isset($this->writeonly) and $this->writeonly !== false) {
 			$schema['writeOnly'] = $this->writeonly;
@@ -338,6 +352,9 @@ class Type {
 		if (isset($this->readonly) and $this->readonly !== false) {
 			$schema['readOnly'] = $this->readonly;
 		}
+		if (isset($this->default)) {
+			$schema['default'] = $this->default;
+		}
 		if (isset($this->writeonly) and $this->writeonly !== false) {
 			$schema['writeOnly'] = $this->writeonly;
 		}
@@ -368,6 +385,9 @@ class Type {
 		if (isset($this->readonly) and $this->readonly !== false) {
 			$schema['readOnly'] = $this->readonly;
 		}
+		if (isset($this->default)) {
+			$schema['default'] = $this->default;
+		}
 		if (isset($this->writeonly) and $this->writeonly !== false) {
 			$schema['writeOnly'] = $this->writeonly;
 		}
@@ -397,6 +417,9 @@ class Type {
 		}
 		if (isset($this->readonly) and $this->readonly !== false) {
 			$schema['readOnly'] = $this->readonly;
+		}
+		if (isset($this->default)) {
+			$schema['default'] = $this->default;
 		}
 		if (isset($this->writeonly) and $this->writeonly !== false) {
 			$schema['writeOnly'] = $this->writeonly;
