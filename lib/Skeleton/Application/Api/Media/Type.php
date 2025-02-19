@@ -53,6 +53,14 @@ class Type {
 	public $nullable = null;
 
 	/**
+	 * Deprecated
+	 *
+	 * @access public
+	 * @var boolean $deprecated
+	 */
+	public $deprecated = null;
+
+	/**
 	 * Properties
 	 *
 	 * @access public
@@ -316,6 +324,9 @@ class Type {
 		if (isset($this->nullable) and $this->nullable !== false) {
 			$schema['nullable'] = $this->nullable;
 		}
+		if (isset($this->deprecated) and $this->deprecated !== false) {
+			$schema['deprecated'] = $this->deprecated;
+		}
 		if (isset($this->readonly) and $this->readonly !== false) {
 			$schema['readOnly'] = $this->readonly;
 		}
@@ -348,6 +359,9 @@ class Type {
 		}
 		if (isset($this->nullable) and $this->nullable !== false) {
 			$schema['nullable'] = $this->nullable;
+		}
+		if (isset($this->deprecated) and $this->deprecated !== false) {
+			$schema['deprecated'] = $this->deprecated;
 		}
 		if (isset($this->readonly) and $this->readonly !== false) {
 			$schema['readOnly'] = $this->readonly;
@@ -382,6 +396,9 @@ class Type {
 		if (isset($this->nullable) and $this->nullable !== false) {
 			$schema['nullable'] = $this->nullable;
 		}
+		if (isset($this->deprecated) and $this->deprecated !== false) {
+			$schema['deprecated'] = $this->deprecated;
+		}
 		if (isset($this->readonly) and $this->readonly !== false) {
 			$schema['readOnly'] = $this->readonly;
 		}
@@ -414,6 +431,9 @@ class Type {
 		}
 		if (isset($this->nullable) and $this->nullable !== false) {
 			$schema['nullable'] = $this->nullable;
+		}
+		if (isset($this->deprecated) and $this->deprecated !== false) {
+			$schema['deprecated'] = $this->deprecated;
 		}
 		if (isset($this->readonly) and $this->readonly !== false) {
 			$schema['readOnly'] = $this->readonly;
