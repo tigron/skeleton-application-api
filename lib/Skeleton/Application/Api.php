@@ -163,14 +163,23 @@ class Api extends \Skeleton\Core\Application {
 		}
 
 		if ($request['dirname'] == '/' and $request['filename'] == '') {
-			$template = \Skeleton\Application\Web\Template::get();
+			$template = new \Skeleton\Template\Template();
+			$template->add_template_path('.');
+			$skeletons = \Skeleton\Core\Skeleton::get_all();
+
+			foreach ($skeletons as $skeleton) {
+				if (file_exists($skeleton->template_path)) {
+					$template->add_template_path($skeleton->template_path, $skeleton->name);
+				}
+			}
+
 			if (isset($this->config->base_uri)) {
 				$template->assign('base_uri', $this->config->base_uri);
 				if (isset($this->config->title)) {
 					$template->assign('title', $this->config->title);
 				}
 			}
-			$template->display('@skeleton-application-api/index.twig');
+			echo $template->render('@skeleton-application-api/index.twig');
 			return;
 		}
 
@@ -422,8 +431,8 @@ class Api extends \Skeleton\Core\Application {
 	 * @param string $context
 	 * @param string $action
 	 */
-	public function call_event_if_exists($context, $action, $arguments = []): mixed {
-		if ($context === 'error' and $action === 'exception') {
+	public function call_event_if_exists(string $context, string $action, array $arguments = []): mixed {
+		if ($context == 'error' and $action == 'exception') {
 			// If an error occures, we need to handle it differently for API
 			$exception = array_shift($arguments);
 			$exception = new \Skeleton\Application\Api\Exception($exception->getMessage(), 500);
@@ -437,11 +446,8 @@ class Api extends \Skeleton\Core\Application {
 	 * Check if an event exists
 	 *
 	 * @access public
-	 * @param string $context
-	 * @param string $action
-	 * @return bool $exists
 	 */
-	public function event_exists($context, $action): bool {
+	public function event_exists(string $context, string $action): bool {
 		if ($context == 'error' and $action == 'exception') {
 			return true;
 		}
