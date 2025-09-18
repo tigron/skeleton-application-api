@@ -32,7 +32,7 @@ class Response {
 	 * @access public
 	 * @var string $conten_type
 	 */
-	public $content_type = null;
+	public $content_type = 'application/json';
 
 	/**
 	 * Type

@@ -235,8 +235,10 @@ class Path {
 		}
 		if ($this->body !== null) {
 			$media_type = $this->body->media_type;
-			$classname = new $media_type->value_type();
-			$this->content_type = $classname->get_openapi_content_type();
+			if ($media_type->type === 'object') {
+				$classname = new $media_type->value_type();
+				$this->content_type = $classname->get_openapi_content_type();
+			}
 			$schema[$route][$this->operation]['requestBody'] = [
 				'required' => true,
 				'content' => [
@@ -375,9 +377,11 @@ class Path {
 					$response->code = 200;
 					$response->description = $tag->getDescription()->getBodyTemplate();
 					$media_type = \Skeleton\Application\Api\Media\Type::create_for_reflection_type($tag->getType());
-					$classname = new $media_type->value_type();
+					if ($media_type->type === 'object') {
+						$classname = new $media_type->value_type();
+						$response->content_type = $classname->get_openapi_content_type();
+					}
 					$response->content = $media_type;
-					$response->content_type = $classname->get_openapi_content_type();
 					$path->responses[] = $response;
 				}
 				/**
@@ -392,7 +396,6 @@ class Path {
 					}
 					$class = new $classname();
 					$response = $class->get_response();
-					$response->content_type = 'application/json';
 					$path->responses[] = $response;
 				}
 
