@@ -254,6 +254,7 @@ class Type {
 			$name = $classname->get_openapi_component_name();
 			$schema['$ref'] = '#/components/schemas/' . $name;
 			return $schema;
+
 		}
 
 		$schema['type'] = 'object';

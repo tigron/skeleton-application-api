@@ -102,6 +102,16 @@ class Generator {
 	}
 
 	/**
+	 * Generate an number
+	 *
+	 * @access public
+	 * @return int $number
+	 */
+	private function generate_number() {
+		return $this->body;
+	}
+
+	/**
 	 * Generate a boolean
 	 *
 	 * @access public
@@ -396,7 +406,7 @@ class Generator {
 	 * @access private
 	 */
 	private function validate_number() {
-		if (is_float($this->body)) {
+		if (is_numeric($this->body)) {
 			return;
 		}
 		$error = [

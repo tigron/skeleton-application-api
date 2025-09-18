@@ -177,7 +177,7 @@ abstract class Endpoint extends \Skeleton\Core\Application\Module {
 		}
 
 		if (is_object($response)) {
-			echo json_encode($response->get_openapi_component_info(), JSON_PRETTY_PRINT);
+			echo $response->output_openapi_component_info();
 		} elseif (is_array($response)) {
 			$output = [];
 			foreach ($response as $value) {
@@ -191,6 +191,7 @@ abstract class Endpoint extends \Skeleton\Core\Application\Module {
 		} else {
 			echo json_encode($response, JSON_PRETTY_PRINT);
 		}
+
 		$application->call_event_if_exists('endpoint', 'teardown', [$this]);
 	}
 

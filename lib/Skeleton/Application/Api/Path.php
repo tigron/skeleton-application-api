@@ -106,6 +106,14 @@ class Path {
 	public $endpoint;
 
 	/**
+	 * Content Type
+	 *
+	 * @access public
+	 * @var string $content_type
+	 */
+	public $content_type = 'application/json';
+
+	/**
 	 * Deprecated
 	 *
 	 * @access public
@@ -225,12 +233,14 @@ class Path {
 				$schema[$route][$this->operation]['parameters'][] = $parameter->get_schema();
 			}
 		}
-
 		if ($this->body !== null) {
+			$media_type = $this->body->media_type;
+			$classname = new $media_type->value_type();
+			$this->content_type = $classname->get_openapi_content_type();
 			$schema[$route][$this->operation]['requestBody'] = [
 				'required' => true,
 				'content' => [
-					'application/json' => $this->body->get_schema(),
+					$this->content_type => $this->body->get_schema(),
 				],
 			];
 		}
@@ -242,9 +252,10 @@ class Path {
 		$schema[$route][$this->operation]['responses'] = [];
 		foreach ($this->responses as $response) {
 			$response_schema = $response->get_schema();
+
 			$schema[$route][$this->operation]['responses'][$response->code]['description'] = $response->description;
 			if ($response_schema !== null) {
-				$schema[$route][$this->operation]['responses'][$response->code]['content']['application/json'] = $response_schema;
+				$schema[$route][$this->operation]['responses'][$response->code]['content'][$response->content_type] = $response_schema;
 			}
 
 			/**
@@ -364,7 +375,9 @@ class Path {
 					$response->code = 200;
 					$response->description = $tag->getDescription()->getBodyTemplate();
 					$media_type = \Skeleton\Application\Api\Media\Type::create_for_reflection_type($tag->getType());
+					$classname = new $media_type->value_type();
 					$response->content = $media_type;
+					$response->content_type = $classname->get_openapi_content_type();
 					$path->responses[] = $response;
 				}
 				/**
@@ -379,6 +392,7 @@ class Path {
 					}
 					$class = new $classname();
 					$response = $class->get_response();
+					$response->content_type = 'application/json';
 					$path->responses[] = $response;
 				}
 

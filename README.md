@@ -204,13 +204,18 @@ For a skeleton-object this can be achieved by simply using the trait
 
     \Skeleton\Application\Api\Component
 
-The trait will implement the following methods that can be overridden:
+**The trait will implement the following methods that can be overridden:**
 
 	public function get_openapi_media_type(): \Skeleton\Application\Api\Media\Type;
 
 Returns the full Media\Type object for the object. By default it returns
 a media type with type 'object' and all properties returned by
 get_openapi_component_properties
+
+	public function get_openapi_content_type(): string;
+
+Returns a string that sets the content_type,by default this will be'application/json'.
+Can for example be changed to 'application/octet-stream', for a file download.
 
 	public function get_openapi_component_name(): string;
 
@@ -240,6 +245,11 @@ An example for the component.
 
 This method returns the actual object in its correct syntax described in
 get_openapi_component_properties
+
+	public function output_openapi_component_info(): void
+
+This method outputs the response, by default this is json_encoded.
+Can for example, be overriden to output a file binary.
 
 ### Skeleton-object
 

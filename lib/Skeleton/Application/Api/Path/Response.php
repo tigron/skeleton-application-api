@@ -27,6 +27,14 @@ class Response {
 	public $description = '';
 
 	/**
+	 * String
+	 *
+	 * @access public
+	 * @var string $conten_type
+	 */
+	public $content_type = null;
+
+	/**
 	 * Type
 	 *
 	 * @access public
@@ -44,6 +52,7 @@ class Response {
 		if ($this->content === null) {
 			return null;
 		}
+
 		$schema = [];
 		$schema['schema'] = $this->content->get_schema();
 		return $schema;

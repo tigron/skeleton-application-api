@@ -93,6 +93,16 @@ trait Component {
 	}
 
 	/**
+	 * Get the the content type for this object
+	 *
+	 * @access public
+	 * @return $string content_type
+	 */
+	public function get_openapi_content_type(): string {
+		return 'application/json';
+	}
+
+	/**
 	 * Get the name of the component
 	 *
 	 * @access public
@@ -190,5 +200,15 @@ trait Component {
 		}
 
 		return $info;
+	}
+
+	/**
+	 * Output the component info in a specific format.
+	 *
+	 * @return void
+	 * @throws \Exception
+	 */
+	public function output_openapi_component_info(): void {
+		echo json_encode($this->get_openapi_component_info(), JSON_PRETTY_PRINT);
 	}
 }
