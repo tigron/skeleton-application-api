@@ -214,7 +214,7 @@ get_openapi_component_properties
 
 	public function get_openapi_content_type(): string;
 
-Returns a string that sets the content_type,by default this will be'application/json'.
+Returns a string that sets the content_type, by default this will be'application/json'.
 Can for example be changed to 'application/octet-stream', for a file download.
 
 	public function get_openapi_component_name(): string;
